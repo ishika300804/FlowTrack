@@ -7,7 +7,10 @@
 			content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 		<meta name="description" content="" />
 		<meta name="author" content="" />
-		<title>Inventory Management System</title>
+		<!-- CSRF tokens for AJAX requests -->
+		<meta name="_csrf" th:content="${_csrf.token}"/>
+		<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+		<title>FlowTrack — Inventory Management</title>
 		<link href="/css/styles.css" rel="stylesheet" />
 		<link href="/css/chatbot.css" rel="stylesheet" />
 		<link

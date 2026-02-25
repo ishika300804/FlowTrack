@@ -16,7 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.Optional;
+import java.util.List;
 
 /**
  * Phase 2: Soft Enforcement Interceptor
@@ -79,8 +79,7 @@ public class OnboardingBannerInterceptor implements HandlerInterceptor {
         }
 
         // Check business profile status (findByUserId returns List)
-        Optional<BusinessProfile> profileOpt = businessProfileRepository.findByUserId(user.getId())
-            .stream().findFirst();
+        List<BusinessProfile> profiles = businessProfileRepository.findByUserId(user.getId());
         
         OnboardingBannerData bannerData = new OnboardingBannerData();
         

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<div th:replace="header :: myHeader"></div>
+</head>
+<body class="sb-nav-fixed">
+    <div th:replace="navbar :: myNavbar"></div>
+    <div id="layoutSidenav">
+        <div th:replace="sidebar :: mySidebar"></div>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid">
+                    <h1 class="mt-4">Onboarding Status Report</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/admin/onboarding/dashboard">Onboarding</a></li>
+                        <li class="breadcrumb-item active">Status Report</li>
+                    </ol>
+
+                    <!-- Summary -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-database mr-1"></i> Total Business Profiles:
+                            <strong th:text="${totalProfiles}">0</strong>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Verification Status Breakdown -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow h-100">
+                                <div class="card-header"><i class="fas fa-shield-alt mr-1"></i> Verification Status</div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><span class="badge badge-secondary">DRAFT</span></span>
+                                        <strong th:text="${statusBreakdown['DRAFT']}">0</strong>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 8px;">
+                                        <div class="progress-bar bg-secondary" role="progressbar"
+                                             th:style="${totalProfiles > 0} ? 'width:' + ${(statusBreakdown['DRAFT'] * 100 / totalProfiles)} + '%' : 'width:0%'"></div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><span class="badge badge-info">PENDING</span></span>
+                                        <strong th:text="${statusBreakdown['PENDING']}">0</strong>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 8px;">
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                             th:style="${totalProfiles > 0} ? 'width:' + ${(statusBreakdown['PENDING'] * 100 / totalProfiles)} + '%' : 'width:0%'"></div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><span class="badge badge-success">VERIFIED</span></span>
+                                        <strong th:text="${statusBreakdown['VERIFIED']}">0</strong>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 8px;">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             th:style="${totalProfiles > 0} ? 'width:' + ${(statusBreakdown['VERIFIED'] * 100 / totalProfiles)} + '%' : 'width:0%'"></div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><span class="badge badge-danger">REJECTED</span></span>
+                                        <strong th:text="${statusBreakdown['REJECTED']}">0</strong>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-danger" role="progressbar"
+                                             th:style="${totalProfiles > 0} ? 'width:' + ${(statusBreakdown['REJECTED'] * 100 / totalProfiles)} + '%' : 'width:0%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Onboarding Stage Breakdown -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow h-100">
+                                <div class="card-header"><i class="fas fa-tasks mr-1"></i> Onboarding Stage</div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><span class="badge badge-warning">TIER 1 COMPLETE</span></span>
+                                        <strong th:text="${stageBreakdown['TIER1_COMPLETE']}">0</strong>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 8px;">
+                                        <div class="progress-bar bg-warning" role="progressbar"
+                                             th:style="${totalProfiles > 0} ? 'width:' + ${(stageBreakdown['TIER1_COMPLETE'] * 100 / totalProfiles)} + '%' : 'width:0%'"></div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><span class="badge badge-primary">TIER 2 COMPLETE</span></span>
+                                        <strong th:text="${stageBreakdown['TIER2_COMPLETE']}">0</strong>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 8px;">
+                                        <div class="progress-bar bg-primary" role="progressbar"
+                                             th:style="${totalProfiles > 0} ? 'width:' + ${(stageBreakdown['TIER2_COMPLETE'] * 100 / totalProfiles)} + '%' : 'width:0%'"></div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><span class="badge badge-success">ACTIVE</span></span>
+                                        <strong th:text="${stageBreakdown['ACTIVE']}">0</strong>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             th:style="${totalProfiles > 0} ? 'width:' + ${(stageBreakdown['ACTIVE'] * 100 / totalProfiles)} + '%' : 'width:0%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+                        <a href="/admin/onboarding/dashboard" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <a href="/admin/onboarding/pending-approvals" class="btn btn-warning ml-2">
+                            <i class="fas fa-clipboard-check"></i> Go to Pending Approvals
+                        </a>
+                    </div>
+                </div>
+            </main>
+            <footer class="py-4 bg-light mt-auto">
+                <div class="container-fluid">
+                    <div class="d-flex align-items-center justify-content-between small">
+                        <div class="text-muted">Copyright &copy; FlowTrack 2024</div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

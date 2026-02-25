@@ -221,10 +221,29 @@ public class BusinessProfileService {
         
         return convertToDTO(updated, userId);
     }
-    
+
     /**
-     * Switch active business profile in session context
-     * User must have access to the target profile
+     * Submit a DRAFT or REJECTED business profile for verification (DRAFT/REJECTED → PENDING)
+     *
+     * @param profileId business profile to submit
+     * @param userId    user making the request (must be OWNER or ADMIN of the profile)
+     * @throws IllegalStateException if the profile is not in a submittable state
+     */
+    public void submitForVerification(Long profileId, Long userId) {
+        BusinessProfile profile = getBusinessProfileWithAccessCheck(profileId, userId);
+
+        if (profile.getVerificationStatus() != VerificationStatus.DRAFT
+                && profile.getVerificationStatus() != VerificationStatus.REJECTED) {
+            throw new IllegalStateException(
+                    "Only DRAFT or REJECTED profiles can be submitted for verification. "
+                            + "Current status: " + profile.getVerificationStatus());
+        }
+
+        profile.setVerificationStatus(VerificationStatus.PENDING);
+        businessProfileRepository.save(profile);
+        logger.info("Business profile {} submitted for verification by user {}", profileId, userId);
+    }
+     /** User must have access to the target profile
      * 
      * @param profileId target business profile ID
      * @param userId user switching profile
