@@ -276,6 +276,16 @@ public class VerificationOrchestrator {
             if (result.getData().containsKey("executionTimeMs")) {
                 log.setExecutionTimeMs((Long) result.getData().get("executionTimeMs"));
             }
+
+            // Store HTTP status code
+            if (result.getData().containsKey("httpStatusCode")) {
+                Object statusCode = result.getData().get("httpStatusCode");
+                if (statusCode instanceof Integer) {
+                    log.setHttpStatusCode((Integer) statusCode);
+                } else if (statusCode instanceof Number) {
+                    log.setHttpStatusCode(((Number) statusCode).intValue());
+                }
+            }
             
             // Store error details if failed
             if (!result.isSuccess() && result.getErrorDetails() != null) {

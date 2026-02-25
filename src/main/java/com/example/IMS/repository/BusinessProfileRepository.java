@@ -67,4 +67,14 @@ public interface BusinessProfileRepository extends JpaRepository<BusinessProfile
            "AND bp.verificationStatus = 'VERIFIED' " +
            "AND bp.onboardingStage = 'ACTIVE'")
     List<BusinessProfile> findActiveProfilesByUserId(@Param("userId") Long userId);
+    
+    /**
+     * Find all profiles by verification status (for admin dashboard)
+     */
+    List<BusinessProfile> findByVerificationStatus(VerificationStatus status);
+    
+    /**
+     * Find all profiles by onboarding stage (for admin dashboard)
+     */
+    List<BusinessProfile> findByOnboardingStage(com.example.IMS.model.enums.OnboardingStage stage);
 }

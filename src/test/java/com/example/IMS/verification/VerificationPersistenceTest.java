@@ -26,11 +26,13 @@ package com.example.IMS.verification;
 
 import com.example.IMS.dto.verification.VerificationRequest;
 import com.example.IMS.dto.verification.VerificationResult;
+import com.example.IMS.model.BankDetails;
 import com.example.IMS.model.BusinessProfile;
 import com.example.IMS.model.User;
 import com.example.IMS.model.VerificationLog;
 import com.example.IMS.model.enums.BusinessType;
 import com.example.IMS.model.enums.VerificationType;
+import com.example.IMS.repository.BankDetailsRepository;
 import com.example.IMS.repository.BusinessProfileRepository;
 import com.example.IMS.repository.IUserRepository;
 import com.example.IMS.repository.VerificationLogRepository;
@@ -70,6 +72,11 @@ public class VerificationPersistenceTest {
     @Autowired
     private IUserRepository userRepository;
 
+    @Autowired
+    private BankDetailsRepository bankDetailsRepository;
+
+    private BankDetails testBankDetails;
+
     @MockBean
     private GstVerificationService gstVerificationService;
 
@@ -103,12 +110,20 @@ public class VerificationPersistenceTest {
         testProfile.setBusinessType(BusinessType.PRIVATE_LIMITED);
         testProfile.setGstin("29ABCDE" + uniqueSuffix + "F1Z5");
         testProfile.setPanNumber("AABCT1234M");
-        testProfile.setBankAccountNumber("1234567890");
-        testProfile.setIfscCode("SBIN0001234");
         testProfile.setRegisteredAddress("123 Test Street");
         testProfile.setState("Maharashtra");
         testProfile.setPincode("400001");
         testProfile = businessProfileRepository.save(testProfile);
+
+        // Create bank details for account masking test
+        testBankDetails = new BankDetails();
+        testBankDetails.setBusinessProfile(testProfile);
+        testBankDetails.setAccountNumber("1234567890");
+        testBankDetails.setIfscCode("SBIN0001234");
+        testBankDetails.setBankName("State Bank of India");
+        testBankDetails.setAccountHolderName("Test Company");
+        testBankDetails.setPrimary(true);
+        testBankDetails = bankDetailsRepository.save(testBankDetails);
 
         // Configure mock services
         when(gstVerificationService.supports(any())).thenAnswer(inv -> {
@@ -123,7 +138,7 @@ public class VerificationPersistenceTest {
 
         when(bankVerificationService.supports(any())).thenAnswer(inv -> {
             return inv.getArgument(0, VerificationRequest.class)
-                .getVerificationType() == VerificationType.BANK_ACCOUNT;
+                .getVerificationType() == VerificationType.BANK;
         });
     }
 
@@ -185,16 +200,16 @@ public class VerificationPersistenceTest {
         responseData.put("ifsc", "SBIN0001234");
         responseData.put("status", "Valid");
 
-        VerificationResult mockResult = VerificationResult.success(VerificationType.BANK_ACCOUNT, "Account verified");
+        VerificationResult mockResult = VerificationResult.success(VerificationType.BANK, "Account verified");
         mockResult.setData(responseData);
 
         when(bankVerificationService.verify(any())).thenReturn(mockResult);
 
         // Act
-        VerificationRequest request = new VerificationRequest();
-        request.setBusinessProfileId(testProfile.getId());
-        request.setVerificationType(VerificationType.BANK_ACCOUNT);
-        request.setIdentifierValue(testProfile.getBankAccountNumber());
+        VerificationRequest request = VerificationRequest.forBank(
+            testProfile.getId(), testBankDetails.getId(),
+            testBankDetails.getAccountNumber(), testBankDetails.getIfscCode(),
+            testBankDetails.getAccountHolderName());
 
         verificationOrchestrator.executeVerification(request);
 
@@ -209,7 +224,7 @@ public class VerificationPersistenceTest {
         String requestPayload = log.getRequestPayload();
         if (requestPayload != null && !requestPayload.isEmpty()) {
             // Account number should be masked like "****7890"
-            assertFalse(requestPayload.contains(testProfile.getBankAccountNumber()), 
+            assertFalse(requestPayload.contains(testBankDetails.getAccountNumber()),
                 "Account number should be masked in request payload");
         }
     }

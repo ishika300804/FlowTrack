@@ -78,12 +78,13 @@ public class OnboardingBannerInterceptor implements HandlerInterceptor {
             return;
         }
 
-        // Check business profile status
-        Optional<BusinessProfile> profileOpt = businessProfileRepository.findByUserId(user.getId());
+        // Check business profile status (findByUserId returns List)
+        Optional<BusinessProfile> profileOpt = businessProfileRepository.findByUserId(user.getId())
+            .stream().findFirst();
         
         OnboardingBannerData bannerData = new OnboardingBannerData();
         
-        if (!profileOpt.isPresent()) {
+        if (profiles.isEmpty()) {
             // No profile - show creation banner
             bannerData.setShow(true);
             bannerData.setType("warning");
@@ -92,7 +93,7 @@ public class OnboardingBannerInterceptor implements HandlerInterceptor {
             bannerData.setActionUrl("/business-profile/create");
             bannerData.setActionText("Create Profile");
         } else {
-            BusinessProfile profile = profileOpt.get();
+            BusinessProfile profile = profiles.get(0); // Use first profile
             
             if (profile.getVerificationStatus() == VerificationStatus.DRAFT) {
                 // Draft profile - encourage submission

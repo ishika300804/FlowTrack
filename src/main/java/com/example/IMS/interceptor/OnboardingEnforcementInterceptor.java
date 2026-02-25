@@ -110,9 +110,9 @@ public class OnboardingEnforcementInterceptor implements HandlerInterceptor {
         User user = (User) principal;
 
         // Check if user has business profile
-        Optional<BusinessProfile> profileOpt = businessProfileRepository.findByUserId(user.getId());
+        List<BusinessProfile> profiles = businessProfileRepository.findByUserId(user.getId());
         
-        if (!profileOpt.isPresent()) {
+        if (profiles.isEmpty()) {
             // No business profile - block protected operations
             if (requiresOnboarding(requestPath)) {
                 response.sendRedirect("/onboarding/required?reason=no_profile");
@@ -121,7 +121,8 @@ public class OnboardingEnforcementInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        BusinessProfile profile = profileOpt.get();
+        // Use first profile (or active profile from context if available)
+        BusinessProfile profile = profiles.get(0);
 
         // Check grace period
         if (isWithinGracePeriod(profile)) {

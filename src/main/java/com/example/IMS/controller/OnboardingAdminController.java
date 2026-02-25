@@ -63,7 +63,7 @@ public class OnboardingAdminController {
         List<BusinessProfile> allProfiles = businessProfileRepository.findAll();
         
         Set<Long> usersWithProfiles = allProfiles.stream()
-            .map(BusinessProfile::getUserId)
+            .map(profile -> profile.getUser().getId())
             .collect(Collectors.toSet());
         
         List<LegacyUserInfo> legacyUsers = allUsers.stream()
@@ -128,8 +128,9 @@ public class OnboardingAdminController {
      */
     @GetMapping("/pending-approvals")
     public String pendingApprovals(Model model) {
-        List<BusinessProfile> pendingProfiles = businessProfileRepository
-            .findByVerificationStatus(VerificationStatus.PENDING);
+        List<BusinessProfile> pendingProfiles = businessProfileRepository.findAll().stream()
+            .filter(p -> p.getVerificationStatus() == VerificationStatus.PENDING)
+            .collect(Collectors.toList());
         
         model.addAttribute("pendingProfiles", pendingProfiles);
         model.addAttribute("totalPending", pendingProfiles.size());
@@ -199,9 +200,12 @@ public class OnboardingAdminController {
         OnboardingMetrics metrics = new OnboardingMetrics();
         
         long totalUsers = userRepository.count();
-        long totalProfiles = businessProfileRepository.count();
-        long activeProfiles = businessProfileRepository.findByOnboardingStage(OnboardingStage.ACTIVE).size();
-        long pendingProfiles = businessProfileRepository.findByVerificationStatus(VerificationStatus.PENDING).size();
+        List<BusinessProfile> allProfiles = businessProfileRepository.findAll();
+        long totalProfiles = allProfiles.size();
+        long activeProfiles = allProfiles.stream()
+            .filter(p -> p.getOnboardingStage() == OnboardingStage.ACTIVE).count();
+        long pendingProfiles = allProfiles.stream()
+            .filter(p -> p.getVerificationStatus() == VerificationStatus.PENDING).count();
         
         metrics.setTotalUsers(totalUsers);
         metrics.setTotalProfiles(totalProfiles);
