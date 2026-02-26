@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory - FlowTrack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: "Inter", sans-serif; background: #f1f5f9; margin: 0; }
+        .sidebar { width:260px; min-height:100vh; background:linear-gradient(180deg,#0f172a,#1e293b); position:fixed; top:0; left:0; display:flex; flex-direction:column; z-index:100; overflow-y:auto; }
+        .sidebar-brand { padding:1.4rem 1.4rem 0.9rem; border-bottom:1px solid rgba(255,255,255,0.08); }
+        .sidebar-brand h4 { font-weight:800; margin:0; font-size:1.1rem; color:#fff; }
+        .sidebar-brand small { opacity:0.5; font-size:0.72rem; color:#fff; }
+        .sidebar-nav { padding:0.75rem 0; flex:1; }
+        .nav-section-label { padding:0.6rem 1.4rem 0.25rem; font-size:0.67rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:rgba(255,255,255,0.35); margin-top:0.5rem; }
+        .sidebar a { display:flex; align-items:center; gap:0.75rem; padding:0.55rem 1.4rem; color:rgba(255,255,255,0.65); text-decoration:none; font-size:0.875rem; transition:all 0.18s; border-left:3px solid transparent; }
+        .sidebar a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+        .sidebar a.active { background:rgba(99,102,241,0.18); color:#a5b4fc; border-left-color:#6366f1; }
+        .sidebar a i { width:18px; text-align:center; font-size:0.875rem; }
+        .sidebar-footer { padding:1rem 1.4rem; border-top:1px solid rgba(255,255,255,0.08); }
+        .main-content { margin-left:260px; min-height:100vh; }
+        .topbar { background:#fff; border-bottom:1px solid #e2e8f0; padding:0.875rem 2rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+        .topbar h5 { margin:0; font-weight:700; color:#0f172a; font-size:1rem; }
+        .page-body { padding:2rem; }
+        .inv-card { background:#fff; border-radius:16px; border:1px solid #e2e8f0; box-shadow:0 1px 4px rgba(0,0,0,0.06); overflow:hidden; }
+        .inv-table thead th { background:#f8fafc; font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; border-bottom:1px solid #e2e8f0; padding:0.85rem 1rem; }
+        .inv-table tbody td { padding:0.85rem 1rem; font-size:0.875rem; color:#1e293b; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+        .inv-table tbody tr:hover { background:#fafafa; }
+        .inv-table tbody tr:last-child td { border-bottom:none; }
+        .badge-stock { display:inline-flex; align-items:center; gap:0.3rem; padding:0.28rem 0.65rem; border-radius:20px; font-size:0.75rem; font-weight:600; }
+        .badge-stock.ok      { background:#f0fdf4; color:#16a34a; }
+        .badge-stock.low     { background:#fff7ed; color:#ea580c; }
+        .badge-stock.out     { background:#fff1f2; color:#e11d48; }
+        .search-input { border-radius:10px; border:1px solid #d1d5db; font-size:0.875rem; padding:0.5rem 1rem; width:260px; }
+        .search-input:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
+        .empty-state { text-align:center; padding:4rem 2rem; }
+        .empty-state i { font-size:3rem; opacity:0.2; margin-bottom:1rem; display:block; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <h4><i class="fas fa-warehouse me-2"></i>FlowTrack</h4>
+        <small>Retailer Portal</small>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="/retailer/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="/business-profile/status"><i class="fas fa-building"></i> Business Profile</a>
+        <div class="nav-section-label">Inventory</div>
+        <a href="/retailer/inventory/add"><i class="fas fa-plus-circle"></i> Add Item</a>
+        <a href="/retailer/inventory" class="active"><i class="fas fa-boxes"></i> View Inventory</a>
+        <a href="/vendors"><i class="fas fa-truck"></i> My Suppliers</a>
+        <div class="nav-section-label">Finance</div>
+        <a href="/business-profile/status"><i class="fas fa-university"></i> Bank Details</a>
+        <a href="/business-profile/status"><i class="fas fa-crown"></i> Subscription</a>
+        <div class="nav-section-label">Reports</div>
+        <a href="/reports"><i class="fas fa-chart-bar"></i> Reports</a>
+        <div class="nav-section-label">Account</div>
+        <a href="/onboarding/required"><i class="fas fa-tasks"></i> Onboarding</a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="/logout" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;">
+            <i class="fas fa-sign-out-alt me-2"></i> Sign Out
+        </a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <h5>Inventory</h5>
+            <div class="text-muted" style="font-size:0.8rem;">
+                <a href="/retailer/dashboard" style="color:inherit;text-decoration:none;">Dashboard</a>
+                <i class="fas fa-chevron-right mx-2" style="font-size:0.65rem;opacity:0.5;"></i>
+                Inventory
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <input id="searchInput" type="text" class="search-input" placeholder='Search items...' oninput="filterTable()">
+            <a href="/retailer/inventory/add" class="btn btn-primary btn-sm" style="background:#6366f1;border-color:#6366f1;">
+                <i class="fas fa-plus me-1"></i> Add Item
+            </a>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <!-- Flash messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible rounded-3 mb-3 fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible rounded-3 mb-3 fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="inv-card">
+            <!-- Empty state -->
+            <div th:if="${#lists.isEmpty(itemDtoList)}" class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h6 style="font-weight:600;color:#1e293b;">No inventory items yet</h6>
+                <p class="text-muted" style="font-size:0.9rem;">Start adding items to track your stock.</p>
+                <a href="/retailer/inventory/add" class="btn btn-primary btn-sm" style="background:#6366f1;border-color:#6366f1;">
+                    <i class="fas fa-plus me-1"></i> Add First Item
+                </a>
+            </div>
+
+            <!-- Items table -->
+            <div th:unless="${#lists.isEmpty(itemDtoList)}">
+                <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+                    <div style="font-size:0.85rem;color:#64748b;">
+                        Showing <strong th:text="${#lists.size(itemDtoList)}">0</strong> items
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table inv-table mb-0" id="inventoryTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Item Name</th>
+                                <th>Type</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th>Stock Value</th>
+                                <th>Fine Rate</th>
+                                <th>Vendor</th>
+                                <th>Invoice</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item, iter : ${itemDtoList}">
+                                <td class="text-muted" th:text="${iter.index + 1}">1</td>
+                                <td><strong th:text="${item.itemName}">Name</strong></td>
+                                <td><span class="badge text-bg-light border" th:text="${item.itemType}">Type</span></td>
+                                <td th:text="${item.itemQuantity}">0</td>
+                                <td th:text="${'&#8377;' + item.itemPrice}">&#8377;0</td>
+                                <td><strong th:text="${'&#8377;' + #numbers.formatDecimal(item.itemQuantity * item.itemPrice, 1, 'COMMA', 2, 'POINT')}">&#8377;0</strong></td>
+                                <td th:text="${'&#8377;' + item.fineRate + '/day'}">&#8377;0</td>
+                                <td th:text="${item.vendorName}">Vendor</td>
+                                <td class="text-muted" th:text="${item.invoiceNumber}">0</td>
+                                <td>
+                                    <span th:if="${item.itemQuantity == 0}" class="badge-stock out">
+                                        <i class="fas fa-times-circle"></i> Out of Stock
+                                    </span>
+                                    <span th:if="${item.itemQuantity > 0 and item.itemQuantity <= 5}" class="badge-stock low">
+                                        <i class="fas fa-exclamation-triangle"></i> Low
+                                    </span>
+                                    <span th:if="${item.itemQuantity > 5}" class="badge-stock ok">
+                                        <i class="fas fa-check-circle"></i> In Stock
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a th:href="@{/ItemEdit/{id}(id=${item.itemId})}"
+                                           class="btn btn-sm btn-outline-primary" style="border-radius:8px;padding:0.3rem 0.6rem;">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a th:href="@{/ItemDelete/{id}(id=${item.itemId})}"
+                                           class="btn btn-sm btn-outline-danger" style="border-radius:8px;padding:0.3rem 0.6rem;"
+                                           onclick="return confirm('Delete this item?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function filterTable() {
+    const filter = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#inventoryTable tbody tr");
+    rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+    });
+}
+</script>
+</body>
+</html>

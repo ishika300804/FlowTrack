@@ -6,6 +6,7 @@ import com.example.IMS.model.enums.OnboardingStage;
 import com.example.IMS.model.enums.VerificationStatus;
 import com.example.IMS.repository.BusinessProfileRepository;
 import com.example.IMS.repository.IUserRepository;
+import com.example.IMS.service.EmailService;
 import com.example.IMS.service.FeatureToggleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,6 +41,9 @@ public class OnboardingAdminController {
 
     @Autowired
     private FeatureToggleService featureToggleService;
+
+    @Autowired
+    private EmailService emailService;
 
     /**
      * Dashboard: Onboarding overview with metrics
@@ -157,9 +161,19 @@ public class OnboardingAdminController {
         profile.setVerificationStatus(VerificationStatus.VERIFIED);
         profile.setOnboardingStage(OnboardingStage.ACTIVE);
         profile.setUpdatedAt(LocalDateTime.now());
-        
         businessProfileRepository.save(profile);
-        
+
+        // E-07/E-11: notify user — approved and fully active
+        try {
+            User user = profile.getUser();
+            emailService.sendProfileApprovedEmail(
+                    user.getEmail(),
+                    user.getFirstName() + " " + user.getLastName());
+        } catch (Exception mailEx) {
+            // Log but don't fail the API response
+            System.err.println("E-07 email failed: " + mailEx.getMessage());
+        }
+
         response.put("success", true);
         response.put("message", "Profile approved successfully");
         return response;
@@ -183,11 +197,21 @@ public class OnboardingAdminController {
         
         BusinessProfile profile = profileOpt.get();
         profile.setVerificationStatus(VerificationStatus.REJECTED);
+        profile.setRejectionReason(reason);
         profile.setUpdatedAt(LocalDateTime.now());
-        // TODO: Store rejection reason in a separate field or verification_log
-        
         businessProfileRepository.save(profile);
-        
+
+        // E-08: notify user — rejected with reason
+        try {
+            User user = profile.getUser();
+            emailService.sendProfileRejectedEmail(
+                    user.getEmail(),
+                    user.getFirstName() + " " + user.getLastName(),
+                    reason);
+        } catch (Exception mailEx) {
+            System.err.println("E-08 email failed: " + mailEx.getMessage());
+        }
+
         response.put("success", true);
         response.put("message", "Profile rejected");
         return response;

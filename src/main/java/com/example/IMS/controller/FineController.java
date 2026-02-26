@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.example.IMS.dto.FineDto;
 import com.example.IMS.model.Borrower;
 import com.example.IMS.service.BorrowerService;
+import com.example.IMS.service.EmailService;
 import com.example.IMS.service.ItemIssuanceService;
 
 @Controller
@@ -25,6 +26,9 @@ public class FineController {
 
 	@Autowired
 	private ItemIssuanceService itemIssuanceService;
+
+	@Autowired
+	private EmailService emailService;
 
 	@GetMapping("/FineView")
 	public String Index(Model model) {
@@ -62,8 +66,23 @@ public class FineController {
 			return "Fine/Create";
 		}
 		try {
+			double fineBefore = borrower.totalFine();
 			borrower.updateFine(fineDto.getFinePaid());
+			double fineAfter = Math.max(0, fineBefore - fineDto.getFinePaid());
 			borrowerService.updateBorrower(borrower);
+
+			// PE-05: send fine payment receipt
+			try {
+				if (borrower.getEmail() != null && !borrower.getEmail().isBlank()) {
+					emailService.sendFinePaymentReceiptEmail(
+							borrower.getEmail(),
+							borrower.getFirstName() + " " + borrower.getLastName(),
+							fineDto.getFinePaid(),
+							fineAfter);
+				}
+			} catch (Exception mailEx) {
+				System.err.println("PE-05 fine receipt email failed: " + mailEx.getMessage());
+			}
 		} catch (Exception e) {
 			System.out.println("Exception caught in Fine Controller.");
 			err = "Unable to update borrower fine details.";

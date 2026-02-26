@@ -118,6 +118,8 @@ public class BusinessProfileController {
             model.addAttribute("errorMessage",
                     "You cannot edit a profile that is pending or already verified. "
                             + "Contact support if you need to make changes.");
+            model.addAttribute("profiles", profiles);
+            model.addAttribute("hasProfile", !profiles.isEmpty());
             return "business-profile/status";
         }
 

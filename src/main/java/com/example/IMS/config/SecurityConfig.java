@@ -1,5 +1,6 @@
 package com.example.IMS.config;
 
+import com.example.IMS.service.GoogleOAuth2UserService;
 import com.example.IMS.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +11,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
@@ -21,10 +21,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    @Autowired
+    private GoogleOAuth2UserService googleOAuth2UserService;
+
+    @Autowired
+    private GoogleOAuth2SuccessHandler googleOAuth2SuccessHandler;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Bean
     @Override
@@ -34,7 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
 
     @Override
@@ -48,6 +52,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 
                 // Registration & Authentication
                 .antMatchers("/register/**", "/login").permitAll()
+                .antMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+
+                // Razorpay webhook — public, signature-verified internally
+                .antMatchers("/payment/webhook").permitAll()
                 
                 // Platform Admin Routes
                 .antMatchers("/admin/**", "/platform/**").hasAuthority("ROLE_PLATFORM_ADMIN")
@@ -71,22 +79,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
                 .successHandler((request, response, authentication) -> {
-                    // Role-based redirect after login
-                    String role = authentication.getAuthorities().iterator().next().getAuthority();
-                    if (role.equals("ROLE_PLATFORM_ADMIN")) {
-                        response.sendRedirect("/admin/dashboard");
-                    } else if (role.equals("ROLE_RETAILER")) {
-                        response.sendRedirect("/retailer/dashboard");
-                    } else if (role.equals("ROLE_VENDOR")) {
-                        response.sendRedirect("/vendor/dashboard");
-                    } else if (role.equals("ROLE_INVESTOR")) {
-                        response.sendRedirect("/investor/dashboard");
-                    } else {
-                        response.sendRedirect("/");
+                    // Role-based redirect — scan ALL authorities (Set order is non-deterministic)
+                    java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> authorities =
+                            authentication.getAuthorities();
+                    String redirect = "/";
+                    for (org.springframework.security.core.GrantedAuthority auth : authorities) {
+                        String role = auth.getAuthority();
+                        if (role.equals("ROLE_PLATFORM_ADMIN")) { redirect = "/admin/dashboard"; break; }
+                        else if (role.equals("ROLE_RETAILER"))   { redirect = "/retailer/dashboard"; break; }
+                        else if (role.equals("ROLE_VENDOR"))     { redirect = "/vendor/dashboard"; break; }
+                        else if (role.equals("ROLE_INVESTOR"))   { redirect = "/investor/dashboard"; break; }
                     }
+                    response.sendRedirect(redirect);
                 })
                 .failureUrl("/login?error=true")
                 .permitAll()
+            .and()
+            .oauth2Login()
+                .loginPage("/login")
+                .userInfoEndpoint()
+                    .userService(googleOAuth2UserService)
+                .and()
+                .successHandler(googleOAuth2SuccessHandler)
             .and()
             .logout()
                 .logoutUrl("/logout")

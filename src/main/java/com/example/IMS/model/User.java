@@ -1,14 +1,20 @@
 package com.example.IMS.model;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +41,27 @@ public class User {
     
     @Column(nullable = false)
     private boolean enabled = true;
-    
+
+    // ── Registration hints ────────────────────────────────────────────────────
+    // Business data collected during sign-up. Stored so the business-profile
+    // creation form can be pre-populated. NOT the authoritative/validated source
+    // (that lives in the business_profiles table).
+    @Column(name = "registration_phone")
+    private String registrationPhone;
+
+    @Column(name = "registration_business_name")
+    private String registrationBusinessName;
+
+    @Column(name = "registration_business_type")
+    private String registrationBusinessType;
+
+    @Column(name = "registration_gst_hint")
+    private String registrationGstHint;
+
+    @Column(name = "registration_address")
+    private String registrationAddress;
+    // ─────────────────────────────────────────────────────────────────────────
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_roles",
@@ -118,5 +144,47 @@ public class User {
     
     public void addRole(Role role) {
         this.roles.add(role);
+    }
+
+    // -------------------------------------------------------------------------
+    // Registration hint getters/setters
+    public String getRegistrationPhone() { return registrationPhone; }
+    public void setRegistrationPhone(String registrationPhone) { this.registrationPhone = registrationPhone; }
+
+    public String getRegistrationBusinessName() { return registrationBusinessName; }
+    public void setRegistrationBusinessName(String registrationBusinessName) { this.registrationBusinessName = registrationBusinessName; }
+
+    public String getRegistrationBusinessType() { return registrationBusinessType; }
+    public void setRegistrationBusinessType(String registrationBusinessType) { this.registrationBusinessType = registrationBusinessType; }
+
+    public String getRegistrationGstHint() { return registrationGstHint; }
+    public void setRegistrationGstHint(String registrationGstHint) { this.registrationGstHint = registrationGstHint; }
+
+    public String getRegistrationAddress() { return registrationAddress; }
+    public void setRegistrationAddress(String registrationAddress) { this.registrationAddress = registrationAddress; }
+
+    // UserDetails interface methods
+    // -------------------------------------------------------------------------
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 }

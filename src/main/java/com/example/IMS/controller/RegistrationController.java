@@ -4,6 +4,8 @@ import com.example.IMS.dto.RetailerRegistrationDto;
 import com.example.IMS.dto.VendorRegistrationDto;
 import com.example.IMS.dto.InvestorRegistrationDto;
 import com.example.IMS.dto.UserRegistrationDto;
+import com.example.IMS.model.User;
+import com.example.IMS.service.EmailService;
 import com.example.IMS.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,9 @@ public class RegistrationController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EmailService emailService;
     
     // Retailer Registration
     @GetMapping("/retailer")
@@ -55,7 +60,26 @@ public class RegistrationController {
             userDto.setFirstName(dto.getFirstName());
             userDto.setLastName(dto.getLastName());
 
-            userService.registerUserWithRole(userDto, "ROLE_RETAILER");
+            User savedUser = userService.registerUserWithRole(userDto, "ROLE_RETAILER");
+
+            // Persist business hints so business-profile/create can be pre-populated
+            userService.saveRegistrationHints(
+                savedUser.getId(),
+                dto.getBusinessName(),
+                dto.getBusinessType(),
+                dto.getGstNumber(),
+                dto.getPhoneNumber(),
+                dto.getBusinessAddress()
+            );
+
+            // E-01: Welcome email
+            try {
+                emailService.sendWelcomeEmail(dto.getEmail(),
+                        dto.getFirstName() + " " + dto.getLastName(), "Retailer");
+            } catch (Exception mailEx) {
+                logger.warn("Welcome email failed for retailer {}: {}", dto.getEmail(), mailEx.getMessage());
+            }
+
             logger.info("Retailer registered: {}", dto.getUsername());
 
             redirectAttributes.addFlashAttribute("successMessage",
@@ -97,7 +121,26 @@ public class RegistrationController {
             userDto.setFirstName(dto.getFirstName());
             userDto.setLastName(dto.getLastName());
 
-            userService.registerUserWithRole(userDto, "ROLE_VENDOR");
+            User savedUser = userService.registerUserWithRole(userDto, "ROLE_VENDOR");
+
+            // Persist business hints so business-profile/create can be pre-populated
+            userService.saveRegistrationHints(
+                savedUser.getId(),
+                dto.getCompanyName(),
+                dto.getBusinessType(),
+                dto.getGstNumber(),
+                dto.getPhoneNumber(),
+                dto.getCompanyAddress()
+            );
+
+            // E-02: Welcome email
+            try {
+                emailService.sendWelcomeEmail(dto.getEmail(),
+                        dto.getFirstName() + " " + dto.getLastName(), "Vendor");
+            } catch (Exception mailEx) {
+                logger.warn("Welcome email failed for vendor {}: {}", dto.getEmail(), mailEx.getMessage());
+            }
+
             logger.info("Vendor registered: {}", dto.getUsername());
 
             redirectAttributes.addFlashAttribute("successMessage",
@@ -140,6 +183,15 @@ public class RegistrationController {
             userDto.setLastName(dto.getLastName());
 
             userService.registerUserWithRole(userDto, "ROLE_INVESTOR");
+
+            // E-03: Welcome email
+            try {
+                emailService.sendWelcomeEmail(dto.getEmail(),
+                        dto.getFirstName() + " " + dto.getLastName(), "Investor");
+            } catch (Exception mailEx) {
+                logger.warn("Welcome email failed for investor {}: {}", dto.getEmail(), mailEx.getMessage());
+            }
+
             logger.info("Investor registered: {}", dto.getUsername());
 
             redirectAttributes.addFlashAttribute("successMessage",

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.example.IMS.convertor.ItemRepairConvertor;
 import com.example.IMS.dto.ItemRepairDto;
 import com.example.IMS.model.ItemRepair;
+import com.example.IMS.service.EmailService;
 import com.example.IMS.service.ItemRepairService;
 import com.example.IMS.service.ItemService;
 import com.example.IMS.service.VendorService;
@@ -30,6 +31,9 @@ public class ItemRepairController {
 	private ItemService itemService;
 	@Autowired
 	private ItemRepairConvertor itemRepairConvertor;
+
+	@Autowired
+	private EmailService emailService;
 
 	@GetMapping("/ItemRepairView")
 	public String View(Model model) {
@@ -60,7 +64,24 @@ public class ItemRepairController {
 			return "/Item Repair/Create";
 		}
 
-		itemRepairService.saveItemRepair(itemRepairConvertor.DtoToModel(itemRepairDto));
+		ItemRepair savedRepair = itemRepairConvertor.DtoToModel(itemRepairDto);
+		itemRepairService.saveItemRepair(savedRepair);
+
+		// E-17: notify vendor of repair request
+		try {
+			if (savedRepair.getVendor() != null
+					&& savedRepair.getVendor().getEmail() != null
+					&& !savedRepair.getVendor().getEmail().isBlank()) {
+				emailService.sendRepairRequestEmail(
+						savedRepair.getVendor().getEmail(),
+						savedRepair.getVendor().getName(),
+						savedRepair.getItem() != null ? savedRepair.getItem().getName() : "Unknown item",
+						savedRepair.getCost());
+			}
+		} catch (Exception mailEx) {
+			System.err.println("E-17 email failed: " + mailEx.getMessage());
+		}
+
 		return "redirect:/ItemRepairView";
 
 	}

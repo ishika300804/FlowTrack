@@ -47,8 +47,11 @@ public class DataInitializer implements CommandLineRunner {
         createItemTypeIfNotExists("Furniture");
         createItemTypeIfNotExists("Electronics");
 
-        // Create default platform admin user if no users exist
-        if (userRepository.count() == 0) {
+        // ── Always ensure the Platform Admin account exists ───────────────────
+        // (do NOT guard by userRepository.count() == 0, that breaks when other
+        //  users already exist in the DB)
+        java.util.Optional<User> existingAdmin = userRepository.findByUsername("admin");
+        if (!existingAdmin.isPresent()) {
             User admin = new User();
             admin.setUsername("admin");
             admin.setEmail("admin@flowtrack.com");
@@ -56,12 +59,35 @@ public class DataInitializer implements CommandLineRunner {
             admin.setFirstName("Platform");
             admin.setLastName("Administrator");
             admin.setEnabled(true);
-            
+
             Role adminRole = roleRepository.findByName("ROLE_PLATFORM_ADMIN").orElseThrow();
             admin.addRole(adminRole);
-            
+
             userRepository.save(admin);
-            System.out.println("✅ Default Platform Admin created - Username: admin, Password: admin123");
+            System.out.println("✅ Platform Admin CREATED  — username: admin  password: admin123");
+        } else {
+            // Admin already exists — ensure password is correct and role is present
+            User admin = existingAdmin.get();
+            boolean changed = false;
+
+            // Force-reset password to known value (idempotent — safe every restart)
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setEnabled(true);
+            changed = true;
+
+            // Ensure ROLE_PLATFORM_ADMIN is attached
+            boolean hasAdminRole = admin.getRoles().stream()
+                    .anyMatch(r -> "ROLE_PLATFORM_ADMIN".equals(r.getName()));
+            if (!hasAdminRole) {
+                Role adminRole = roleRepository.findByName("ROLE_PLATFORM_ADMIN").orElseThrow();
+                admin.addRole(adminRole);
+                changed = true;
+            }
+
+            if (changed) {
+                userRepository.save(admin);
+                System.out.println("🔄 Platform Admin REFRESHED — username: admin  password: admin123");
+            }
         }
 
         // Create sample data for testing

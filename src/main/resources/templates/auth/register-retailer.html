@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retailer Registration - FlowTrack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a6b3c 0%, #2e9e5c 50%, #1a6b3c 100%);
+            min-height: 100vh;
+            padding: 30px 0;
+        }
+        .register-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .card {
+            border: none;
+            border-radius: 18px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.25);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #1a6b3c 0%, #2e9e5c 100%);
+            color: white;
+            border-radius: 18px 18px 0 0 !important;
+            padding: 32px 36px;
+        }
+        .card-header .badge-role {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            padding: 5px 14px;
+            border-radius: 20px;
+        }
+        .section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #1a6b3c;
+            margin: 24px 0 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e9f7ef;
+        }
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #d0e7da;
+            padding: 10px 14px;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus {
+            border-color: #2e9e5c;
+            box-shadow: 0 0 0 3px rgba(46,158,92,0.15);
+        }
+        .form-group label {
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+        .form-group label .badge-optional {
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: #718096;
+            background: #edf2f7;
+            padding: 2px 7px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+        .btn-register {
+            background: linear-gradient(135deg, #1a6b3c 0%, #2e9e5c 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 13px;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s;
+        }
+        .btn-register:hover { opacity: 0.9; }
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: #e9f7ef;
+            color: #1a6b3c;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+        .password-strength {
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 6px;
+            background: #e2e8f0;
+            transition: all 0.3s;
+        }
+        .strength-bar { height: 100%; border-radius: 2px; transition: width 0.3s; }
+        .alert-custom {
+            border-radius: 10px;
+            border: none;
+            padding: 14px 18px;
+        }
+        .input-group-text {
+            background: #f0faf4;
+            border-color: #d0e7da;
+            color: #1a6b3c;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="register-container">
+
+        <!-- Brand Header -->
+        <div class="text-center mb-4">
+            <a href="/landing" class="text-white text-decoration-none">
+                <i class="fas fa-warehouse fa-2x mb-2 d-block"></i>
+                <span style="font-size:1.4rem; font-weight:700;">FlowTrack</span>
+            </a>
+        </div>
+
+        <div class="card">
+            <!-- Card Header -->
+            <div class="card-header">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="badge-role"><i class="fas fa-store mr-1"></i> RETAILER</span>
+                        <h4 class="mt-2 mb-1 font-weight-bold">Create Your Retailer Account</h4>
+                        <p class="mb-0" style="opacity:0.85; font-size:0.9rem;">
+                            Manage your inventory, vendors, and supply chain from one place.
+                        </p>
+                    </div>
+                    <i class="fas fa-store fa-3x" style="opacity:0.3;"></i>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body p-4">
+
+                <div th:if="${errorMessage}" class="alert alert-danger alert-custom" th:text="${errorMessage}"></div>
+
+                <form th:action="@{/register/retailer}" th:object="${retailerDto}" method="post" id="registrationForm">
+
+                    <!-- Alerts -->
+                    <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger alert-custom">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        Please fix the errors below before continuing.
+                    </div>
+
+                    <!-- ── SECTION 1: Account Credentials ── -->
+                    <div class="section-title">
+                        <span class="step-badge">1</span> Account Credentials
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="firstName">First Name <span class="text-danger">*</span></label>
+                            <input type="text" id="firstName" class="form-control"
+                                   th:field="*{firstName}" placeholder="Aarav"
+                                   th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:errors="*{firstName}"></div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="lastName">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" id="lastName" class="form-control"
+                                   th:field="*{lastName}" placeholder="Sharma"
+                                   th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:errors="*{lastName}"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username">
+                            <i class="fas fa-user mr-1"></i> Username <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-at"></i></span>
+                            </div>
+                            <input type="text" id="username" class="form-control"
+                                   th:field="*{username}" placeholder="aarav_retailer"
+                                   th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:errors="*{username}"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope mr-1"></i> Email Address <span class="text-danger">*</span>
+                        </label>
+                        <input type="email" id="email" class="form-control"
+                               th:field="*{email}" placeholder="aarav@yourstore.in"
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:errors="*{email}"></div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="password">
+                                <i class="fas fa-lock mr-1"></i> Password <span class="text-danger">*</span>
+                            </label>
+                            <input type="password" id="password" class="form-control"
+                                   th:field="*{password}" placeholder="Min. 6 characters"
+                                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                                   oninput="checkPasswordStrength(this.value)">
+                            <div class="password-strength mt-1" id="strengthBar">
+                                <div class="strength-bar" id="strengthFill"></div>
+                            </div>
+                            <div class="invalid-feedback" th:errors="*{password}"></div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="confirmPassword">
+                                <i class="fas fa-lock mr-1"></i> Confirm Password <span class="text-danger">*</span>
+                            </label>
+                            <input type="password" id="confirmPassword" class="form-control"
+                                   th:field="*{confirmPassword}" placeholder="Re-enter password"
+                                   th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:errors="*{confirmPassword}"></div>
+                        </div>
+                    </div>
+
+                    <!-- ── SECTION 2: Business Details ── -->
+                    <div class="section-title">
+                        <span class="step-badge">2</span> Business Details
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-8">
+                            <label for="businessName">Business / Store Name <span class="text-danger">*</span></label>
+                            <input type="text" id="businessName" class="form-control"
+                                   th:field="*{businessName}" placeholder="Sharma General Store"
+                                   th:classappend="${#fields.hasErrors('businessName')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:errors="*{businessName}"></div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="businessType">Business Type <span class="text-danger">*</span></label>
+                            <select id="businessType" class="form-control"
+                                    th:field="*{businessType}"
+                                    th:classappend="${#fields.hasErrors('businessType')} ? 'is-invalid' : ''">
+                                <option value="">-- Select --</option>
+                                <option value="SOLE_PROPRIETORSHIP">Sole Proprietorship</option>
+                                <option value="PARTNERSHIP">Partnership</option>
+                                <option value="PRIVATE_LIMITED">Pvt. Ltd</option>
+                                <option value="LLP">LLP</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{businessType}"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="phoneNumber">Phone Number <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                </div>
+                                <input type="tel" id="phoneNumber" class="form-control"
+                                       th:field="*{phoneNumber}" placeholder="9876543210"
+                                       th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:errors="*{phoneNumber}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="gstNumber">
+                                GSTIN <span class="badge-optional">Optional</span>
+                            </label>
+                            <input type="text" id="gstNumber" class="form-control text-uppercase"
+                                   th:field="*{gstNumber}" placeholder="29ABCDE1234F1Z5"
+                                   maxlength="15">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="businessAddress">Business Address <span class="text-danger">*</span></label>
+                        <textarea id="businessAddress" class="form-control" rows="2"
+                                  th:field="*{businessAddress}" placeholder="Shop No., Street, City, State – PIN"
+                                  th:classappend="${#fields.hasErrors('businessAddress')} ? 'is-invalid' : ''"></textarea>
+                        <div class="invalid-feedback" th:errors="*{businessAddress}"></div>
+                    </div>
+
+                    <!-- Optional fields toggle -->
+                    <div class="mb-3">
+                        <a data-toggle="collapse" href="#optionalFields" class="text-success" style="font-size:0.875rem;">
+                            <i class="fas fa-chevron-down mr-1"></i> Show additional fields (optional)
+                        </a>
+                    </div>
+                    <div class="collapse" id="optionalFields">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="trademark">Trademark / Brand Name <span class="badge-optional">Optional</span></label>
+                                <input type="text" id="trademark" class="form-control"
+                                       th:field="*{trademark}" placeholder="Your brand name">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="businessRegistrationNumber">Registration Number <span class="badge-optional">Optional</span></label>
+                                <input type="text" id="businessRegistrationNumber" class="form-control"
+                                       th:field="*{businessRegistrationNumber}" placeholder="UDYAM/CIN/Reg no.">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="businessDescription">Business Description <span class="badge-optional">Optional</span></label>
+                            <textarea id="businessDescription" class="form-control" rows="2"
+                                      th:field="*{businessDescription}"
+                                      placeholder="Brief description of what your store sells..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Terms -->
+                    <div class="form-check mb-4">
+                        <input type="checkbox" class="form-check-input" id="terms" required>
+                        <label class="form-check-label text-muted" for="terms" style="font-size:0.85rem;">
+                            I agree to the <a href="#" class="text-success">Terms of Service</a>
+                            and <a href="#" class="text-success">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-register btn-block">
+                        <i class="fas fa-user-plus mr-2"></i> Create Retailer Account
+                    </button>
+                </form>
+
+                <hr class="mt-4">
+                <div class="text-center text-muted" style="font-size:0.875rem;">
+                    <p class="mb-1">Already have an account? <a href="/login" class="text-success font-weight-bold">Log in</a></p>
+                    <p class="mb-0">Registering as a vendor? <a href="/register/vendor" class="text-success">Vendor registration →</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step indicator -->
+        <div class="text-center mt-3 text-white" style="font-size:0.8rem; opacity:0.8;">
+            <i class="fas fa-info-circle mr-1"></i>
+            After registration, log in and complete your <strong>Business Profile</strong> to unlock all features.
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function checkPasswordStrength(password) {
+        const fill = document.getElementById('strengthFill');
+        let strength = 0;
+        if (password.length >= 6) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+        const colors = ['#e53e3e', '#ed8936', '#ecc94b', '#48bb78'];
+        const widths = ['25%', '50%', '75%', '100%'];
+        fill.style.width = strength > 0 ? widths[strength - 1] : '0%';
+        fill.style.background = strength > 0 ? colors[strength - 1] : 'transparent';
+    }
+
+    // Password match validation
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        const pw = document.getElementById('password').value;
+        const cpw = document.getElementById('confirmPassword').value;
+        if (pw !== cpw) {
+            e.preventDefault();
+            document.getElementById('confirmPassword').classList.add('is-invalid');
+            const existing = document.getElementById('confirmPassword').nextElementSibling;
+            if (existing) existing.textContent = 'Passwords do not match.';
+        }
+    });
+</script>
+</body>
+</html>

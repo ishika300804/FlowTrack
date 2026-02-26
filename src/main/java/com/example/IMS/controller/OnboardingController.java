@@ -66,7 +66,7 @@ public class OnboardingController {
      * Increments the dismiss counter for analytics and sets the dismissed flag.
      * Returns a JSON response so the banner can hide itself via JavaScript.
      */
-    @PostMapping("/banner/dismiss")
+    @PostMapping(value = "/banner/dismiss", produces = "application/json")
     @ResponseBody
     public String dismissBanner(HttpSession session) {
         session.setAttribute(BANNER_DISMISSED_KEY, Boolean.TRUE);

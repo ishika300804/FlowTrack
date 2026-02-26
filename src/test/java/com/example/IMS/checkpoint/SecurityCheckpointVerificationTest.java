@@ -175,9 +175,11 @@ public class SecurityCheckpointVerificationTest {
     
     private void createRole(Long businessProfileId, Long userId, BusinessRole role) {
         // Use JDBC to insert role relationship
+        // Note: created_at and updated_at are NOT NULL in the Hibernate-generated H2 schema
+        // (MySQL had DEFAULT CURRENT_TIMESTAMP from Flyway migrations, H2 does not)
         jdbcTemplate.update(
-            "INSERT INTO business_profile_roles (business_profile_id, user_id, role, granted_at, is_active) " +
-            "VALUES (?, ?, ?, NOW(), ?)",
+            "INSERT INTO business_profile_roles (business_profile_id, user_id, role, granted_at, is_active, created_at, updated_at) " +
+            "VALUES (?, ?, ?, NOW(), ?, NOW(), NOW())",
             businessProfileId, userId, role.name(), true
         );
     }
@@ -189,19 +191,20 @@ public class SecurityCheckpointVerificationTest {
         String encryptedAccountNumber = encryptionConverter.convertToDatabaseColumn(accountNumber);
         
         // Use JDBC to insert bank account
+        // Note: updated_at is NOT NULL in the Hibernate-generated H2 schema (no DB-level default)
         if (status == BankVerificationStatus.VERIFIED) {
             jdbcTemplate.update(
                 "INSERT INTO bank_details (business_profile_id, ifsc_code, bank_name, branch_name, " +
-                "account_holder_name, account_number, bank_verification_status, is_primary, last_verified_at, created_at) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+                "account_holder_name, account_number, bank_verification_status, is_primary, last_verified_at, created_at, updated_at) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())",
                 businessProfileId, ifsc, bankName, branchName, accountHolderName,
                 encryptedAccountNumber, status.name(), isPrimary
             );
         } else {
             jdbcTemplate.update(
                 "INSERT INTO bank_details (business_profile_id, ifsc_code, bank_name, branch_name, " +
-                "account_holder_name, account_number, bank_verification_status, is_primary, created_at) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+                "account_holder_name, account_number, bank_verification_status, is_primary, created_at, updated_at) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
                 businessProfileId, ifsc, bankName, branchName, accountHolderName,
                 encryptedAccountNumber, status.name(), isPrimary
             );

@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Inventory Item - FlowTrack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: "Inter", sans-serif; background: #f1f5f9; margin: 0; }
+        .sidebar { width:260px; min-height:100vh; background:linear-gradient(180deg,#0f172a,#1e293b); position:fixed; top:0; left:0; display:flex; flex-direction:column; z-index:100; overflow-y:auto; }
+        .sidebar-brand { padding:1.4rem 1.4rem 0.9rem; border-bottom:1px solid rgba(255,255,255,0.08); }
+        .sidebar-brand h4 { font-weight:800; margin:0; font-size:1.1rem; color:#fff; }
+        .sidebar-brand small { opacity:0.5; font-size:0.72rem; color:#fff; }
+        .sidebar-nav { padding:0.75rem 0; flex:1; }
+        .nav-section-label { padding:0.6rem 1.4rem 0.25rem; font-size:0.67rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:rgba(255,255,255,0.35); margin-top:0.5rem; }
+        .sidebar a { display:flex; align-items:center; gap:0.75rem; padding:0.55rem 1.4rem; color:rgba(255,255,255,0.65); text-decoration:none; font-size:0.875rem; transition:all 0.18s; border-left:3px solid transparent; }
+        .sidebar a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+        .sidebar a.active { background:rgba(99,102,241,0.18); color:#a5b4fc; border-left-color:#6366f1; }
+        .sidebar a i { width:18px; text-align:center; font-size:0.875rem; }
+        .sidebar-footer { padding:1rem 1.4rem; border-top:1px solid rgba(255,255,255,0.08); }
+        .main-content { margin-left:260px; min-height:100vh; }
+        .topbar { background:#fff; border-bottom:1px solid #e2e8f0; padding:0.875rem 2rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+        .topbar h5 { margin:0; font-weight:700; color:#0f172a; font-size:1rem; }
+        .page-body { padding:2rem; max-width:720px; }
+        .form-card { background:#fff; border-radius:16px; border:1px solid #e2e8f0; padding:2rem; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+        .form-label { font-size:0.85rem; font-weight:600; color:#374151; }
+        .form-control, .form-select { border-radius:10px; border:1px solid #d1d5db; font-size:0.9rem; padding:0.55rem 0.9rem; }
+        .form-control:focus, .form-select:focus { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
+        .form-text { font-size:0.78rem; color:#9ca3af; }
+        .btn-submit { background:#6366f1; color:#fff; border:none; border-radius:10px; padding:0.65rem 2rem; font-weight:600; font-size:0.9rem; transition:background 0.18s; }
+        .btn-submit:hover { background:#4f46e5; color:#fff; }
+        .section-divider { color:#94a3b8; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.09em; margin:1.5rem 0 0.75rem; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <h4><i class="fas fa-warehouse me-2"></i>FlowTrack</h4>
+        <small>Retailer Portal</small>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="/retailer/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="/business-profile/status"><i class="fas fa-building"></i> Business Profile</a>
+        <div class="nav-section-label">Inventory</div>
+        <a href="/retailer/inventory/add" class="active"><i class="fas fa-plus-circle"></i> Add Item</a>
+        <a href="/retailer/inventory"><i class="fas fa-boxes"></i> View Inventory</a>
+        <a href="/vendors"><i class="fas fa-truck"></i> My Suppliers</a>
+        <div class="nav-section-label">Finance</div>
+        <a href="/business-profile/status"><i class="fas fa-university"></i> Bank Details</a>
+        <a href="/business-profile/status"><i class="fas fa-crown"></i> Subscription</a>
+        <div class="nav-section-label">Reports</div>
+        <a href="/reports"><i class="fas fa-chart-bar"></i> Reports</a>
+        <div class="nav-section-label">Account</div>
+        <a href="/onboarding/required"><i class="fas fa-tasks"></i> Onboarding</a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="/logout" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;">
+            <i class="fas fa-sign-out-alt me-2"></i> Sign Out
+        </a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <h5>Add Inventory Item</h5>
+            <div class="text-muted" style="font-size:0.8rem;">
+                <a href="/retailer/dashboard" style="color:inherit;text-decoration:none;">Dashboard</a>
+                <i class="fas fa-chevron-right mx-2" style="font-size:0.65rem;opacity:0.5;"></i>
+                <a href="/retailer/inventory" style="color:inherit;text-decoration:none;">Inventory</a>
+                <i class="fas fa-chevron-right mx-2" style="font-size:0.65rem;opacity:0.5;"></i>
+                Add Item
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/retailer/inventory" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i> Back to Inventory
+            </a>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div class="form-card">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width:48px;height:48px;background:#eff6ff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">
+                    <i class="fas fa-plus-circle" style="color:#3b82f6;"></i>
+                </div>
+                <div>
+                    <div style="font-weight:700;font-size:1.1rem;color:#0f172a;">New Inventory Item</div>
+                    <div class="text-muted" style="font-size:0.85rem;">Fill in the details to add a new item to your stock.</div>
+                </div>
+            </div>
+
+            <!-- Global Errors -->
+            <div class="alert alert-danger rounded-3" th:if="${#fields.hasErrors('global')}">
+                <ul class="mb-0 ps-3">
+                    <li th:each="err : ${#fields.errors('global')}" th:text="${err}"></li>
+                </ul>
+            </div>
+
+            <form th:action="@{/ItemCreate}" th:object="${itemDto}" method="post" novalidate>
+                <div class="section-divider">Item Details</div>
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label">Item Name <span class="text-danger">*</span></label>
+                        <input th:field="*{itemName}" type="text" class="form-control"
+                               th:classappend="${#fields.hasErrors('itemName')} ? ' is-invalid'"
+                               placeholder="e.g. Office Chair — Black"/>
+                        <div class="invalid-feedback" th:errors="*{itemName}"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Item Type <span class="text-danger">*</span></label>
+                        <select th:field="*{itemType}" class="form-select"
+                                th:classappend="${#fields.hasErrors('itemType')} ? ' is-invalid'">
+                            <option value="">— Select type —</option>
+                            <option th:each="type : ${itemTypeList}"
+                                    th:value="${type.typeName}"
+                                    th:text="${type.typeName}">Type</option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{itemType}"></div>
+                    </div>
+                </div>
+
+                <div class="section-divider">Stock &amp; Pricing</div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Quantity <span class="text-danger">*</span></label>
+                        <input th:field="*{itemQuantity}" type="number" min="1" class="form-control"
+                               th:classappend="${#fields.hasErrors('itemQuantity')} ? ' is-invalid'"
+                               placeholder="0"/>
+                        <div class="invalid-feedback" th:errors="*{itemQuantity}"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Unit Price (&#8377;) <span class="text-danger">*</span></label>
+                        <input th:field="*{itemPrice}" type="number" min="0.01" step="0.01" class="form-control"
+                               th:classappend="${#fields.hasErrors('itemPrice')} ? ' is-invalid'"
+                               placeholder="0.00"/>
+                        <div class="invalid-feedback" th:errors="*{itemPrice}"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Fine Rate (&#8377;/day)</label>
+                        <input th:field="*{fineRate}" type="number" min="0" step="0.01" class="form-control"
+                               th:classappend="${#fields.hasErrors('fineRate')} ? ' is-invalid'"
+                               placeholder="0.00"/>
+                        <div class="form-text">Late-return fine rate per day</div>
+                        <div class="invalid-feedback" th:errors="*{fineRate}"></div>
+                    </div>
+                </div>
+
+                <div class="section-divider">Supplier &amp; Invoice</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Vendor / Supplier Name <span class="text-danger">*</span></label>
+                        <input th:field="*{vendorName}" type="text" class="form-control"
+                               th:classappend="${#fields.hasErrors('vendorName')} ? ' is-invalid'"
+                               placeholder="e.g. Reliable Supplies Co."/>
+                        <div class="invalid-feedback" th:errors="*{vendorName}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Invoice Number <span class="text-danger">*</span></label>
+                        <input th:field="*{invoiceNumber}" type="number" class="form-control"
+                               th:classappend="${#fields.hasErrors('invoiceNumber')} ? ' is-invalid'"
+                               placeholder="e.g. 100001"/>
+                        <div class="invalid-feedback" th:errors="*{invoiceNumber}"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 mt-4">
+                    <button type="submit" class="btn btn-submit">
+                        <i class="fas fa-plus-circle me-2"></i>Add to Inventory
+                    </button>
+                    <a href="/retailer/inventory" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

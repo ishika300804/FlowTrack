@@ -4,6 +4,7 @@ import com.example.IMS.model.enums.BusinessType;
 import com.example.IMS.model.enums.OnboardingStage;
 import com.example.IMS.model.enums.VerificationStatus;
 import com.example.IMS.util.SensitiveDataEncryptionConverter;
+import java.time.LocalDate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -120,7 +121,22 @@ public class BusinessProfile {
     
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-    
+
+    // ── Subscription ──────────────────────────────────────────────────────────
+    /** e.g. "CORE" or "PREMIUM" — null until first payment */
+    @Column(name = "subscription_plan", length = 20)
+    private String subscriptionPlan;
+
+    @Column(name = "subscription_start_date")
+    private LocalDate subscriptionStartDate;
+
+    @Column(name = "subscription_expiry_date")
+    private LocalDate subscriptionExpiryDate;
+
+    /** Razorpay payment_id of the most recent subscription payment */
+    @Column(name = "last_payment_id", length = 100)
+    private String lastPaymentId;
+
     /**
      * One-to-Many relationship with BankDetails
      * One business can have multiple bank accounts
@@ -303,7 +319,25 @@ public class BusinessProfile {
     public void setVerificationLogs(List<VerificationLog> verificationLogs) {
         this.verificationLogs = verificationLogs;
     }
-    
+
+    // ── Subscription getters/setters ──────────────────────────────────────────
+    public String getSubscriptionPlan() { return subscriptionPlan; }
+    public void setSubscriptionPlan(String subscriptionPlan) { this.subscriptionPlan = subscriptionPlan; }
+
+    public LocalDate getSubscriptionStartDate() { return subscriptionStartDate; }
+    public void setSubscriptionStartDate(LocalDate subscriptionStartDate) { this.subscriptionStartDate = subscriptionStartDate; }
+
+    public LocalDate getSubscriptionExpiryDate() { return subscriptionExpiryDate; }
+    public void setSubscriptionExpiryDate(LocalDate subscriptionExpiryDate) { this.subscriptionExpiryDate = subscriptionExpiryDate; }
+
+    public String getLastPaymentId() { return lastPaymentId; }
+    public void setLastPaymentId(String lastPaymentId) { this.lastPaymentId = lastPaymentId; }
+
+    public boolean hasActiveSubscription() {
+        return subscriptionPlan != null && subscriptionExpiryDate != null
+                && !subscriptionExpiryDate.isBefore(LocalDate.now());
+    }
+
     // Helper methods
     
     /**

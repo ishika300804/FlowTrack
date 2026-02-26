@@ -18,6 +18,7 @@ import com.example.IMS.model.Borrower;
 import com.example.IMS.model.Item;
 import com.example.IMS.model.Loan;
 import com.example.IMS.service.BorrowerService;
+import com.example.IMS.service.EmailService;
 import com.example.IMS.service.ItemIssuanceService;
 import com.example.IMS.service.ItemService;
 
@@ -38,6 +39,9 @@ public class ItemIssuanceController {
 	
 	@Autowired
 	private com.example.IMS.service.DashboardTrackingService dashboardTrackingService;
+
+	@Autowired
+	private EmailService emailService;
 
 	@GetMapping("/ItemIssuanceView")
 	public String View(Model model) {
@@ -87,6 +91,23 @@ public class ItemIssuanceController {
 		itemService.saveItem(item);
 		itemIssuanceService.saveItemIssued(loan);
 		dashboardTrackingService.captureSnapshot("ITEM_ISSUED");
+
+		// E-12: notify borrower that item has been issued
+		try {
+			if (borrower.getEmail() != null && !borrower.getEmail().isBlank()) {
+				String dueDate = com.example.IMS.Utilities.Helper
+						.getDueDate(loan.getIssueDate(), loan.getLoanDuration());
+				emailService.sendItemIssuedEmail(
+						borrower.getEmail(),
+						borrower.getFirstName() + " " + borrower.getLastName(),
+						item.getName(),
+						loan.getIssueDate(),
+						dueDate);
+			}
+		} catch (Exception mailEx) {
+			System.err.println("E-12 email failed: " + mailEx.getMessage());
+		}
+
 		return "redirect:/ItemIssuanceView";
 	}
 
