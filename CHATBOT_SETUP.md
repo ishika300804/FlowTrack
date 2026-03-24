@@ -1,7 +1,6 @@
-# 🤖 Chatbot Integration Guide
+# 🤖 Chatbot Integration
 
 ## ✅ What's Already Integrated
-
 The chatbot is **fully integrated** into your IMS application! Here's what's been set up:
 
 ### Backend Components
