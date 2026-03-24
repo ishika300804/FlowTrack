@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FlowTrack - Smart Inventory Management System for Small & Medium Businesses. Track stock, manage vendors, and get AI-powered insights.">
+    <meta name="keywords" content="inventory management, stock tracking, vendor management, AI chatbot, business software">
+    <title>FlowTrack - Smart Inventory Management for Growing Businesses</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation Library CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/landing.css}">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm" style="background: #2d3748 !important;">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/landing}">
+                <i class="fas fa-chart-line" style="color: #4299e1;"></i>
+                <span class="fw-bold ms-2" style="color: white;">FlowTrack</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#pricing">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact Us</a>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="btn btn-outline-primary" th:href="@{/login}">Login</a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-primary" href="#get-started">Get Started</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container">
+            <div class="row align-items-center min-vh-100 py-5">
+                <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right">
+                    <h1 class="display-3 fw-bold mb-4">Smart Inventory Management for Growing Businesses</h1>
+                    <p class="lead text-muted mb-4">Track stock, manage vendors, monitor loans, automate fines, and get AI-powered insights — all in one platform.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a th:href="@{/get-started}" class="btn btn-primary btn-lg px-4">
+                            <i class="fas fa-rocket me-2"></i>Start Free Trial
+                        </a>
+                        <a th:href="@{/login}" class="btn btn-outline-primary btn-lg px-4">
+                            <i class="fas fa-lock me-2"></i>Login to Dashboard
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="hero-illustration">
+                        <img src="https://raw.githubusercontent.com/unDraw/illustrations/master/illustrations/warehouse.svg" alt="Inventory Dashboard" class="img-fluid" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 800 600%22%3E%3Crect fill=%22%23e0e7ff%22 width=%22800%22 height=%22600%22 rx=%2220%22/%3E%3Crect x=%22100%22 y=%22100%22 width=%22600%22 height=%22400%22 rx=%2215%22 fill=%22white%22/%3E%3Crect x=%22150%22 y=%22150%22 width=%22200%22 height=%22150%22 rx=%2210%22 fill=%22%23667eea%22 opacity=%220.2%22/%3E%3Crect x=%22400%22 y=%22150%22 width=%22200%22 height=%22150%22 rx=%2210%22 fill=%22%238b5cf6%22 opacity=%220.2%22/%3E%3Ctext x=%22400%22 y=%2250%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2230%22 font-weight=%22bold%22 fill=%22%23667eea%22%3EInventory Management%3C/text%3E%3Crect x=%22180%22 y=%22350%22 width=%2260%22 height=%22120%22 rx=%225%22 fill=%22%23667eea%22/%3E%3Crect x=%22270%22 y=%22380%22 width=%2260%22 height=%2290%22 rx=%225%22 fill=%22%238b5cf6%22/%3E%3Crect x=%22360%22 y=%22340%22 width=%2260%22 height=%22130%22 rx=%225%22 fill=%22%23a78bfa%22/%3E%3Crect x=%22450%22 y=%22370%22 width=%2260%22 height=%22100%22 rx=%225%22 fill=%22%23c4b5fd%22/%3E%3Cpath d=%22M 150 200 L 200 180 L 250 190 L 300 170%22 stroke=%22%23667eea%22 stroke-width=%224%22 fill=%22none%22/%3E%3Ccircle cx=%22450%22 cy=%22200%22 r=%2240%22 fill=%22%23667eea%22 opacity=%220.3%22/%3E%3Cpath d=%22M 430 200 L 445 215 L 470 185%22 stroke=%22%23667eea%22 stroke-width=%225%22 fill=%22none%22 stroke-linecap=%22round%22/%3E%3C/svg%3E';">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5 bg-light">
+        <div class="container py-5">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-4 fw-bold mb-3">Powerful Features</h2>
+                <p class="lead text-muted">Everything you need to manage your inventory efficiently</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Inventory Tracking</h4>
+                        <ul class="list-unstyled text-muted">
+                            <li><i class="fas fa-check text-success me-2"></i>Add, edit, delete items</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Real-time stock updates</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Role-Based Access Control</h4>
+                        <ul class="list-unstyled text-muted">
+                            <li><i class="fas fa-check text-success me-2"></i>Admin, Manager, Staff, User roles</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Secure login & authentication</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Item Issuance & Return</h4>
+                        <ul class="list-unstyled text-muted">
+                            <li><i class="fas fa-check text-success me-2"></i>Track borrowed items</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Automatic fine calculation</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Vendor Management</h4>
+                        <ul class="list-unstyled text-muted">
+                            <li><i class="fas fa-check text-success me-2"></i>Manage suppliers</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Vendor contact records</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">AI Chatbot Assistant</h4>
+                        <ul class="list-unstyled text-muted">
+                            <li><i class="fas fa-check text-success me-2"></i>Ask: "Show low stock items"</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Get real-time data</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Powered by AI</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="600">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Reports & Analytics</h4>
+                        <ul class="list-unstyled text-muted">
+                            <li><i class="fas fa-check text-success me-2"></i>View stock trends</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Monitor inventory health</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section id="get-started" class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container py-5">
+            <div class="text-center text-white" data-aos="fade-up">
+                <h2 class="display-4 fw-bold mb-4">Ready to Get Started?</h2>
+                <p class="lead mb-5">Join thousands of businesses already using FlowTrack to streamline their operations</p>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a th:href="@{/get-started}" class="btn btn-light btn-lg px-5 py-3" style="border-radius: 50px; font-weight: 600;">
+                        <i class="fas fa-rocket me-2"></i>Get Started Now
+                    </a>
+                    <a th:href="@{/login}" class="btn btn-outline-light btn-lg px-5 py-3" style="border-radius: 50px; font-weight: 600; border-width: 2px;">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-5">
+        <div class="container py-5">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-4 fw-bold mb-3">How It Works</h2>
+                <p class="lead text-muted">Get started in three simple steps</p>
+            </div>
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="step-card text-center">
+                        <div class="step-number">01</div>
+                        <div class="step-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Register Your Account</h4>
+                        <p class="text-muted">Sign up in minutes and create your business profile</p>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="step-card text-center">
+                        <div class="step-number">02</div>
+                        <div class="step-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Choose Subscription Plan</h4>
+                        <p class="text-muted">Select the plan that fits your business needs</p>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="step-card text-center">
+                        <div class="step-number">03</div>
+                        <div class="step-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Access Your Smart Dashboard</h4>
+                        <p class="text-muted">Start managing your inventory with AI-powered insights</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-5 bg-light">
+        <div class="container py-5">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-4 fw-bold mb-3">Simple, Transparent Pricing</h2>
+                <p class="lead text-muted">Choose the perfect plan for your business</p>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h4 class="fw-bold">Basic Plan</h4>
+                            <div class="price">
+                                <span class="currency">₹</span>
+                                <span class="amount">499</span>
+                                <span class="period">/month</span>
+                            </div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li><i class="fas fa-check"></i>Inventory management</li>
+                            <li><i class="fas fa-check"></i>Limited reports</li>
+                            <li><i class="fas fa-check"></i>Email support</li>
+                        </ul>
+                        <a th:href="@{/get-started}" class="btn btn-outline-primary w-100">Subscribe</a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="pricing-card popular">
+                        <div class="popular-badge">Most Popular</div>
+                        <div class="pricing-header">
+                            <h4 class="fw-bold">Professional Plan</h4>
+                            <div class="price">
+                                <span class="currency">₹</span>
+                                <span class="amount">999</span>
+                                <span class="period">/month</span>
+                            </div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li><i class="fas fa-check"></i>Full inventory control</li>
+                            <li><i class="fas fa-check"></i>Vendor & loan tracking</li>
+                            <li><i class="fas fa-check"></i>AI Chatbot</li>
+                            <li><i class="fas fa-check"></i>Role-based access</li>
+                        </ul>
+                        <a th:href="@{/get-started}" class="btn btn-primary w-100">Subscribe</a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h4 class="fw-bold">Enterprise Plan</h4>
+                            <div class="price">
+                                <span class="amount" style="font-size: 2rem;">Custom</span>
+                            </div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li><i class="fas fa-check"></i>Unlimited users</li>
+                            <li><i class="fas fa-check"></i>Advanced analytics</li>
+                            <li><i class="fas fa-check"></i>Priority support</li>
+                            <li><i class="fas fa-check"></i>Custom integrations</li>
+                        </ul>
+                        <a href="#contact" class="btn btn-outline-primary w-100">Contact Us</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="py-5">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
+                    <img src="https://raw.githubusercontent.com/unDraw/illustrations/master/illustrations/data-reports.svg" alt="About FlowTrack" class="img-fluid rounded" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 800 600%22%3E%3Crect fill=%22%23f8fafc%22 width=%22800%22 height=%22600%22 rx=%2220%22/%3E%3Ctext x=%22400%22 y=%2280%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2240%22 font-weight=%22bold%22 fill=%22%231e293b%22%3EBusiness Analytics%3C/text%3E%3Crect x=%22150%22 y=%22150%22 width=%22200%22 height=%22300%22 rx=%2215%22 fill=%22%23e0e7ff%22/%3E%3Crect x=%22180%22 y=%22350%22 width=%2250%22 height=%2280%22 rx=%225%22 fill=%22%23667eea%22/%3E%3Crect x=%22250%22 y=%22320%22 width=%2250%22 height=%22110%22 rx=%225%22 fill=%22%238b5cf6%22/%3E%3Crect x=%22450%22 y=%22150%22 width=%22200%22 height=%22300%22 rx=%2215%22 fill=%22%23ddd6fe%22/%3E%3Ccircle cx=%22550%22 cy=%22250%22 r=%2260%22 fill=%22none%22 stroke=%22%23667eea%22 stroke-width=%228%22/%3E%3Cpath d=%22M 550 250 L 550 190 A 60 60 0 0 1 610 250 Z%22 fill=%22%23667eea%22/%3E%3Cpath d=%22M 550 250 L 490 250 A 60 60 0 0 1 550 190 Z%22 fill=%22%238b5cf6%22/%3E%3Cpath d=%22M 150 500 L 250 450 L 350 470 L 450 420 L 550 440 L 650 400%22 stroke=%22%23667eea%22 stroke-width=%226%22 fill=%22none%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%22150%22 cy=%22500%22 r=%2210%22 fill=%22%23667eea%22/%3E%3Ccircle cx=%22250%22 cy=%22450%22 r=%2210%22 fill=%22%23667eea%22/%3E%3Ccircle cx=%22350%22 cy=%22470%22 r=%2210%22 fill=%22%23667eea%22/%3E%3Ccircle cx=%22450%22 cy=%22420%22 r=%2210%22 fill=%22%23667eea%22/%3E%3Ccircle cx=%22550%22 cy=%22440%22 r=%2210%22 fill=%22%23667eea%22/%3E%3Ccircle cx=%22650%22 cy=%22400%22 r=%2210%22 fill=%22%23667eea%22/%3E%3C/svg%3E';">
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <h2 class="display-4 fw-bold mb-4">About FlowTrack</h2>
+                    <p class="lead mb-4">FlowTrack is designed to empower small and medium businesses with intelligent inventory control. Built using Spring Boot, MySQL, secure authentication, and AI integration, our system ensures real-time tracking, secure access, and data-driven decision-making.</p>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="about-feature">
+                                <i class="fas fa-shield-alt text-primary"></i>
+                                <h5 class="fw-bold mt-2">Secure</h5>
+                                <p class="text-muted small">Enterprise-grade security</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="about-feature">
+                                <i class="fas fa-expand-arrows-alt text-primary"></i>
+                                <h5 class="fw-bold mt-2">Scalable</h5>
+                                <p class="text-muted small">Grows with your business</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="about-feature">
+                                <i class="fas fa-brain text-primary"></i>
+                                <h5 class="fw-bold mt-2">AI-Powered</h5>
+                                <p class="text-muted small">Smart insights & automation</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="about-feature">
+                                <i class="fas fa-store text-primary"></i>
+                                <h5 class="fw-bold mt-2">Built for SMEs</h5>
+                                <p class="text-muted small">Tailored for your needs</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Us Section -->
+    <section id="contact" class="py-5 bg-light">
+        <div class="container py-5">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-4 fw-bold mb-3">Get In Touch</h2>
+                <p class="lead text-muted">Have questions? We'd love to hear from you</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h5 class="fw-bold">Email</h5>
+                                <p class="text-muted">support@flowtrack.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <h5 class="fw-bold">Phone</h5>
+                                <p class="text-muted">+91 98765 43210</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h5 class="fw-bold">Location</h5>
+                                <p class="text-muted">Mumbai, India</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <form class="contact-form">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Your Name" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" class="form-control" placeholder="Your Email" required>
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" rows="5" placeholder="Your Message" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h4 class="fw-bold mb-3">
+                        <i class="fas fa-chart-line"></i> FlowTrack
+                    </h4>
+                    <p class="text-muted">Smart Inventory Management for Growing Businesses</p>
+                </div>
+                <div class="col-lg-4">
+                    <h5 class="fw-bold mb-3">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#home" class="text-muted text-decoration-none">Home</a></li>
+                        <li><a href="#about" class="text-muted text-decoration-none">About Us</a></li>
+                        <li><a href="#features" class="text-muted text-decoration-none">Features</a></li>
+                        <li><a href="#pricing" class="text-muted text-decoration-none">Pricing</a></li>
+                        <li><a href="#contact" class="text-muted text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h5 class="fw-bold mb-3">Follow Us</h5>
+                    <div class="social-links">
+                        <a href="#" class="text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 bg-secondary">
+            <div class="text-center text-muted">
+                <p class="mb-0">&copy; 2026 FlowTrack. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Admin Login Link -->
+    <a th:href="@{/login}" class="admin-login-link text-decoration-none" title="Admin Login">
+        <i class="fas fa-user-shield"></i> Admin Login
+    </a>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AOS Animation Library JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Custom JS -->
+    <script th:src="@{/js/landing.js}"></script>
+</body>
+</html>

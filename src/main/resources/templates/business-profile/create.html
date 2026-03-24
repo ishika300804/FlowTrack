@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<div th:replace="header :: myHeader"></div>
+</head>
+<body class="sb-nav-fixed">
+    <div th:replace="navbar :: myNavbar"></div>
+    <div id="layoutSidenav">
+        <div th:replace="sidebar :: mySidebar"></div>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid">
+                    <h1 class="mt-4">Create Business Profile</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Create Business Profile</li>
+                    </ol>
+
+                    <!-- Error / success alerts -->
+                    <div th:if="${errorMessage}" class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span th:text="${errorMessage}"></span>
+                    </div>
+
+                    <!-- Informational banner -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Fill in your business details below. All fields marked <span class="text-danger">*</span>
+                        are mandatory. After creation your profile will be in <strong>DRAFT</strong> status —
+                        submit it for verification when ready.
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header"><i class="fas fa-building mr-1"></i> Business Information</div>
+                        <div class="card-body">
+                            <form th:action="@{/business-profile/create}"
+                                  th:object="${profileRequest}"
+                                  method="post">
+
+                                <!-- Legal Name & Type -->
+                                <div class="form-row">
+                                    <div class="form-group col-md-8">
+                                        <label>Legal Business Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control"
+                                               th:field="*{legalBusinessName}"
+                                               placeholder="As registered with MCA / GST authority"
+                                               th:classappend="${#fields.hasErrors('legalBusinessName')} ? 'is-invalid' : ''"/>
+                                        <div class="invalid-feedback" th:errors="*{legalBusinessName}"></div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Business Type <span class="text-danger">*</span></label>
+                                        <select class="form-control" th:field="*{businessType}"
+                                                th:classappend="${#fields.hasErrors('businessType')} ? 'is-invalid' : ''">
+                                            <option value="">-- Select Type --</option>
+                                            <option th:each="bt : ${businessTypes}"
+                                                    th:value="${bt}"
+                                                    th:text="${bt.name().replace('_', ' ')}"></option>
+                                        </select>
+                                        <div class="invalid-feedback" th:errors="*{businessType}"></div>
+                                    </div>
+                                </div>
+
+                                <!-- GSTIN & PAN -->
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>GSTIN <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control text-uppercase"
+                                               th:field="*{gstin}"
+                                               placeholder="29ABCDE1234F1Z5"
+                                               maxlength="15"
+                                               th:classappend="${#fields.hasErrors('gstin')} ? 'is-invalid' : ''"/>
+                                        <small class="form-text text-muted">Format: 29ABCDE1234F1Z5</small>
+                                        <div class="invalid-feedback" th:errors="*{gstin}"></div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>PAN Number <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control text-uppercase"
+                                               th:field="*{panNumber}"
+                                               placeholder="ABCDE1234F"
+                                               maxlength="10"
+                                               th:classappend="${#fields.hasErrors('panNumber')} ? 'is-invalid' : ''"/>
+                                        <small class="form-text text-muted">Format: ABCDE1234F</small>
+                                        <div class="invalid-feedback" th:errors="*{panNumber}"></div>
+                                    </div>
+                                </div>
+
+                                <!-- CIN & Udyam (Optional) -->
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>CIN Number <small class="text-muted">(Optional — For Pvt Ltd / LLP)</small></label>
+                                        <input type="text" class="form-control text-uppercase"
+                                               th:field="*{cinNumber}"
+                                               placeholder="L12345MH2024PLC123456"
+                                               th:classappend="${#fields.hasErrors('cinNumber')} ? 'is-invalid' : ''"/>
+                                        <div class="invalid-feedback" th:errors="*{cinNumber}"></div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Udyam Number <small class="text-muted">(Optional — For MSMEs)</small></label>
+                                        <input type="text" class="form-control text-uppercase"
+                                               th:field="*{udyamNumber}"
+                                               placeholder="UDYAM-KA-26-1234567"
+                                               th:classappend="${#fields.hasErrors('udyamNumber')} ? 'is-invalid' : ''"/>
+                                        <div class="invalid-feedback" th:errors="*{udyamNumber}"></div>
+                                    </div>
+                                </div>
+
+                                <hr/>
+
+                                <!-- Address -->
+                                <div class="form-group">
+                                    <label>Registered Address <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" rows="3"
+                                              th:field="*{registeredAddress}"
+                                              placeholder="Plot / Door No., Street, Area, City"
+                                              th:classappend="${#fields.hasErrors('registeredAddress')} ? 'is-invalid' : ''"></textarea>
+                                    <div class="invalid-feedback" th:errors="*{registeredAddress}"></div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group col-md-8">
+                                        <label>State <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control"
+                                               th:field="*{state}"
+                                               placeholder="e.g. Maharashtra"
+                                               th:classappend="${#fields.hasErrors('state')} ? 'is-invalid' : ''"/>
+                                        <div class="invalid-feedback" th:errors="*{state}"></div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Pincode <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control"
+                                               th:field="*{pincode}"
+                                               placeholder="400001"
+                                               maxlength="6"
+                                               th:classappend="${#fields.hasErrors('pincode')} ? 'is-invalid' : ''"/>
+                                        <div class="invalid-feedback" th:errors="*{pincode}"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Create Profile (Save as Draft)
+                                    </button>
+                                    <a href="/" class="btn btn-secondary ml-2">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <footer class="py-4 bg-light mt-auto">
+                <div class="container-fluid">
+                    <div class="d-flex align-items-center justify-content-between small">
+                        <div class="text-muted">Copyright &copy; FlowTrack 2024</div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

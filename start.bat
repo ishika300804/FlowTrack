@@ -4,22 +4,24 @@ echo  Inventory Management System Launcher
 echo ========================================
 echo.
 
+REM Prompt for API key
+set /p GEMINI_API_KEY="Enter your Gemini API Key: "
+
+if "%GEMINI_API_KEY%"=="" (
+    echo ERROR: API key cannot be empty!
+    pause
+    exit /b 1
+)
+
+echo.
+echo API Key set successfully!
+echo Starting application...
+echo.
+
 REM Set JAVA_HOME if not already set
 if "%JAVA_HOME%"=="" (
     set "JAVA_HOME=C:\Program Files\Java\jdk-24"
     echo JAVA_HOME set to: %JAVA_HOME%
-)
-
-REM Check if GEMINI_API_KEY is set
-if "%GEMINI_API_KEY%"=="" (
-    echo WARNING: GEMINI_API_KEY environment variable is not set!
-    echo.
-    echo Please set your Gemini API key:
-    echo   set GEMINI_API_KEY=your_api_key_here
-    echo.
-    echo Or press Ctrl+C to cancel and set it first.
-    echo.
-    pause
 )
 
 echo Starting MySQL check...
@@ -61,6 +63,7 @@ echo Press Ctrl+C to stop the application
 echo ========================================
 echo.
 
+REM Start the application
 call mvnw.cmd spring-boot:run
 
 pause

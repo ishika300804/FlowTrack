@@ -4,6 +4,9 @@ import com.example.IMS.model.Item;
 import com.example.IMS.model.Vendor;
 import com.example.IMS.repository.IItemRepository;
 import com.example.IMS.repository.IVendorRepository;
+import com.example.IMS.service.EmailService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
@@ -17,11 +20,16 @@ import java.util.List;
 @RequestMapping("/vendors")
 public class VendorController {
 
+    private static final Logger logger = LoggerFactory.getLogger(VendorController.class);
+
     @Autowired
     private IVendorRepository vendorRepository;
 
     @Autowired
     private IItemRepository itemRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     // List all vendors
     @GetMapping
@@ -39,8 +47,18 @@ public class VendorController {
 
     // Save vendor
     @PostMapping("/save")
-    public String saveVendor(@ModelAttribute Vendor vendor) {
+    public String saveVendor(@ModelAttribute Vendor vendor, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         vendorRepository.save(vendor);
+
+        // E-19: welcome email to newly added vendor
+        try {
+            if (vendor.getEmail() != null && !vendor.getEmail().isBlank()) {
+                emailService.sendVendorWelcomeEmail(vendor.getEmail(), vendor.getName());
+            }
+        } catch (Exception mailEx) {
+            logger.warn("E-19 vendor welcome email failed for {}: {}", vendor.getEmail(), mailEx.getMessage());
+        }
+
         return "redirect:/vendors";
     }
 

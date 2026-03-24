@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<div th:replace="header :: myHeader"></div>
+</head>
+<body class="sb-nav-fixed">
+    <div th:replace="navbar :: myNavbar"></div>
+    <div id="layoutSidenav">
+        <div th:replace="sidebar :: mySidebar"></div>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid">
+                    <h1 class="mt-4">Legacy Users</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/admin/onboarding/dashboard">Onboarding</a></li>
+                        <li class="breadcrumb-item active">Legacy Users</li>
+                    </ol>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Legacy Users</strong> are registered users who have not yet created a business profile.
+                        These users will be prompted to complete onboarding when soft or hard enforcement is enabled.
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-user-times mr-1"></i> Users Without Business Profile
+                                (<span th:text="${totalLegacyUsers}">0</span> total)</span>
+                            <a href="/admin/onboarding/dashboard" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${totalLegacyUsers == 0}" class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> All users have business profiles. No legacy users found.
+                            </div>
+                            <div th:if="${totalLegacyUsers > 0}" class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>User ID</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Roles</th>
+                                            <th>Days Since Registration</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="legacyUser : ${legacyUsers}">
+                                            <td th:text="${legacyUser.userId}"></td>
+                                            <td th:text="${legacyUser.username}"></td>
+                                            <td th:text="${legacyUser.email}"></td>
+                                            <td>
+                                                <span class="badge badge-secondary" th:text="${legacyUser.roles}"></span>
+                                            </td>
+                                            <td th:text="${legacyUser.daysSinceRegistration}"></td>
+                                            <td>
+                                                <a th:href="@{/admin/users/edit/{id}(id=${legacyUser.userId})}"
+                                                   class="btn btn-sm btn-info" title="View User">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <footer class="py-4 bg-light mt-auto">
+                <div class="container-fluid">
+                    <div class="d-flex align-items-center justify-content-between small">
+                        <div class="text-muted">Copyright &copy; FlowTrack 2024</div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            if ($('#dataTable').length) { $('#dataTable').DataTable(); }
+        });
+    </script>
+</body>
+</html>

@@ -36,32 +36,58 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Create roles if they don't exist
-        createRoleIfNotExists("ROLE_ADMIN");
-        createRoleIfNotExists("ROLE_MANAGER");
-        createRoleIfNotExists("ROLE_STAFF");
-        createRoleIfNotExists("ROLE_USER");
+        // Create roles if they don't exist - New FlowTrack SaaS Model
+        createRoleIfNotExists("ROLE_PLATFORM_ADMIN");
+        createRoleIfNotExists("ROLE_RETAILER");
+        createRoleIfNotExists("ROLE_VENDOR");
+        createRoleIfNotExists("ROLE_INVESTOR");
 
         // Create item types if they don't exist
         createItemTypeIfNotExists("Stationary");
         createItemTypeIfNotExists("Furniture");
         createItemTypeIfNotExists("Electronics");
 
-        // Create default admin user if no users exist
-        if (userRepository.count() == 0) {
+        // ── Always ensure the Platform Admin account exists ───────────────────
+        // (do NOT guard by userRepository.count() == 0, that breaks when other
+        //  users already exist in the DB)
+        java.util.Optional<User> existingAdmin = userRepository.findByUsername("admin");
+        if (!existingAdmin.isPresent()) {
             User admin = new User();
             admin.setUsername("admin");
-            admin.setEmail("admin@ims.com");
+            admin.setEmail("admin@flowtrack.com");
             admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setFirstName("System");
+            admin.setFirstName("Platform");
             admin.setLastName("Administrator");
             admin.setEnabled(true);
-            
-            Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow();
+
+            Role adminRole = roleRepository.findByName("ROLE_PLATFORM_ADMIN").orElseThrow();
             admin.addRole(adminRole);
-            
+
             userRepository.save(admin);
-            System.out.println("✅ Default admin user created - Username: admin, Password: admin123");
+            System.out.println("✅ Platform Admin CREATED  — username: admin  password: admin123");
+        } else {
+            // Admin already exists — ensure password is correct and role is present
+            User admin = existingAdmin.get();
+            boolean changed = false;
+
+            // Force-reset password to known value (idempotent — safe every restart)
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setEnabled(true);
+            changed = true;
+
+            // Ensure ROLE_PLATFORM_ADMIN is attached
+            boolean hasAdminRole = admin.getRoles().stream()
+                    .anyMatch(r -> "ROLE_PLATFORM_ADMIN".equals(r.getName()));
+            if (!hasAdminRole) {
+                Role adminRole = roleRepository.findByName("ROLE_PLATFORM_ADMIN").orElseThrow();
+                admin.addRole(adminRole);
+                changed = true;
+            }
+
+            if (changed) {
+                userRepository.save(admin);
+                System.out.println("🔄 Platform Admin REFRESHED — username: admin  password: admin123");
+            }
         }
 
         // Create sample data for testing

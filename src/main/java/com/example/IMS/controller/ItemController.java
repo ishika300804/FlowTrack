@@ -41,16 +41,29 @@ public class ItemController {
 
 	@GetMapping("/ItemView")
 	public String View(Model model) {
+		// Redirect to new modern inventory page
+		return "redirect:/retailer/inventory";
+	}
+
+	/** New modern inventory list (retailer UI) */
+	@GetMapping("/retailer/inventory")
+	public String retailerInventory(Model model) {
 		model.addAttribute("itemDtoList", itemConvertor.modelToDto(itemService.getAllItems()));
-		return "/Item/View";
+		return "retailer/item-view";
 	}
 
 	@GetMapping("/ItemCreate")
 	public String Create(Model model) {
-		ItemDto itemDto = new ItemDto();
-		model.addAttribute("itemDto", itemDto);
+		// Redirect to new modern item creation page
+		return "redirect:/retailer/inventory/add";
+	}
+
+	/** New modern Add Item form (retailer UI) */
+	@GetMapping("/retailer/inventory/add")
+	public String retailerAddItem(Model model) {
+		model.addAttribute("itemDto", new ItemDto());
 		model.addAttribute("itemTypeList", itemTypeService.getAllItemTypes());
-		return "/Item/Create";
+		return "retailer/item-create";
 	}
 
 	@PostMapping("/ItemCreate")
@@ -80,14 +93,14 @@ public class ItemController {
 
 		if (result.hasErrors()) {
 			model.addAttribute("itemTypeList", itemTypeService.getAllItemTypes());
-			return "/Item/Create";
+			return "retailer/item-create";
 		}
 		item = itemConvertor.dtoToModel(itemDto);
 		item.setVendor(vendor);
 		item.setItemType(itemType);
 		itemService.saveItem(item);
 		dashboardTrackingService.captureSnapshot("ITEM_ADDED");
-		return "redirect:/ItemView";
+		return "redirect:/retailer/inventory";
 	}
 
 	@GetMapping("/ItemEdit/{id}")
@@ -150,7 +163,7 @@ public class ItemController {
 		item.setItemType(itemType);
 		itemService.saveItem(item);
 		dashboardTrackingService.captureSnapshot("ITEM_UPDATED");
-		return "redirect:/ItemView";
+		return "redirect:/retailer/inventory";
 	}
 
 	@GetMapping("/ItemDelete/{id}")
@@ -163,7 +176,7 @@ public class ItemController {
 	@PostMapping("/ItemDelete/{id}")
 	public String Delete(@PathVariable(value = "id") long id, @ModelAttribute("itemDto") ItemDto itemDto) {
 		itemService.deleteItem(id);
-		return "redirect:/ItemView";
+		return "redirect:/retailer/inventory";
 	}
 
 }

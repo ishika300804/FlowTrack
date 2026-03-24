@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Details - FlowTrack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .wizard-header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1.25rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .wizard-header h5 { margin: 0; font-weight: 700; color: #2d3748; }
+        .wizard-body { max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+
+        /* Stepper */
+        .wizard-steps {
+            display: flex; align-items: center;
+            background: white; border-radius: 14px;
+            padding: 1.25rem 2rem; margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+        }
+        .wstep { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+        .wstep:not(:last-child)::after {
+            content: '';
+            position: absolute; top: 18px; left: 60%; width: 80%;
+            height: 2px; background: #e2e8f0;
+        }
+        .wstep.done:not(:last-child)::after { background: #48bb78; }
+        .wstep-circle {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 0.85rem; z-index: 1;
+            margin-bottom: 0.4rem;
+        }
+        .wstep.done .wstep-circle { background: #48bb78; color: white; }
+        .wstep.active .wstep-circle { background: #3182ce; color: white; box-shadow: 0 0 0 4px rgba(49,130,206,0.2); }
+        .wstep.pending .wstep-circle { background: #e2e8f0; color: #718096; }
+        .wstep-label { font-size: 0.75rem; color: #718096; font-weight: 500; text-align: center; }
+        .wstep.active .wstep-label { color: #3182ce; font-weight: 600; }
+        .wstep.done .wstep-label { color: #38a169; }
+
+        .wizard-card {
+            background: white; border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .wizard-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 1.75rem 2rem;
+        }
+        .wizard-card-header h4 { font-weight: 700; margin: 0; }
+        .wizard-card-header p { opacity: 0.9; margin: 0.3rem 0 0; font-size: 0.9rem; }
+        .wizard-card-body { padding: 2rem; }
+
+        .security-note {
+            background: #f0fff4;
+            border: 1px solid #c6f6d5;
+            border-radius: 10px;
+            padding: 0.9rem 1rem;
+            font-size: 0.85rem;
+            color: #276749;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="wizard-header">
+    <div class="d-flex align-items-center gap-3">
+        <a th:href="@{/business-profile/status}" class="text-muted text-decoration-none">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h5><i class="fas fa-warehouse me-2" style="color:#667eea;"></i>FlowTrack</h5>
+    </div>
+    <span class="text-muted" style="font-size:0.85rem;">Business Onboarding Wizard</span>
+</div>
+
+<div class="wizard-body">
+
+    <!-- Steps -->
+    <div class="wizard-steps">
+        <div class="wstep done">
+            <div class="wstep-circle"><i class="fas fa-check" style="font-size:0.8rem;"></i></div>
+            <div class="wstep-label">Profile</div>
+        </div>
+        <div class="wstep active">
+            <div class="wstep-circle">2</div>
+            <div class="wstep-label">Bank Details</div>
+        </div>
+        <div class="wstep pending">
+            <div class="wstep-circle">3</div>
+            <div class="wstep-label">Subscription</div>
+        </div>
+        <div class="wstep pending">
+            <div class="wstep-circle">4</div>
+            <div class="wstep-label">Review</div>
+        </div>
+    </div>
+
+    <!-- Card -->
+    <div class="wizard-card">
+        <div class="wizard-card-header">
+            <h4><i class="fas fa-university me-2"></i>Bank Account Details</h4>
+            <p>Add your primary bank account for payments &amp; verification via penny drop</p>
+        </div>
+        <div class="wizard-card-body">
+
+            <!-- Flash messages -->
+            <div th:if="${successMessage}" class="alert alert-success mb-3">
+                <i class="fas fa-check-circle me-1"></i>
+                <span th:text="${successMessage}"></span>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger mb-3">
+                <i class="fas fa-exclamation-circle me-1"></i>
+                <span th:text="${errorMessage}"></span>
+            </div>
+
+            <!-- Existing accounts list -->
+            <div th:if="${bankAccounts != null and !bankAccounts.isEmpty()}" class="mb-4">
+                <h6 class="fw-600 text-muted text-uppercase mb-3" style="font-size:0.75rem; letter-spacing:0.08em;">
+                    Saved Accounts
+                </h6>
+                <div th:each="account : ${bankAccounts}"
+                     class="d-flex align-items-center justify-content-between p-3 rounded-3 mb-2"
+                     style="background:#f8fafc; border:1px solid #e2e8f0;">
+                    <div>
+                        <div class="fw-600" th:text="${account.bankName}">Bank Name</div>
+                        <div class="text-muted" style="font-size:0.85rem;">
+                            A/C Holder: <span th:text="${account.accountHolderName}"></span>
+                            &nbsp;·&nbsp; IFSC: <span th:text="${account.ifscCode}"></span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span th:if="${account.primary}" class="badge bg-success-subtle text-success border border-success-subtle">Primary</span>
+                        <span class="badge" th:switch="${account.bankVerificationStatus?.name()}"
+                              th:with="vs=${account.bankVerificationStatus?.name()}">
+                            <span th:case="'VERIFIED'" class="badge bg-success">Verified</span>
+                            <span th:case="'PENDING'" class="badge bg-warning text-dark">Pending</span>
+                            <span th:case="*" class="badge bg-secondary">Unverified</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add bank account form -->
+            <h6 class="fw-600 text-muted text-uppercase mb-3" style="font-size:0.75rem; letter-spacing:0.08em;">
+                <i class="fas fa-plus-circle me-1" style="color:#667eea;"></i> Add Bank Account
+            </h6>
+
+            <form th:action="@{/business-profile/bank}" method="post">
+                <input type="hidden" name="profileId" th:value="${profileId}">
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-500">Account Holder Name <span class="text-danger">*</span></label>
+                        <input type="text" name="accountHolderName" class="form-control"
+                               placeholder="As per bank records" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-500">Bank Name <span class="text-danger">*</span></label>
+                        <input type="text" name="bankName" class="form-control"
+                               placeholder="e.g. HDFC Bank" required>
+                    </div>
+                    <div class="col-md-7">
+                        <label class="form-label fw-500">Account Number <span class="text-danger">*</span></label>
+                        <input type="text" name="accountNumber" class="form-control"
+                               placeholder="12-digit account number" required
+                               pattern="[0-9]{9,18}" title="9-18 digit account number">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-500">IFSC Code <span class="text-danger">*</span></label>
+                        <input type="text" name="ifscCode" class="form-control text-uppercase"
+                               placeholder="HDFC0001234" required maxlength="11"
+                               pattern="^[A-Z]{4}0[A-Z0-9]{6}$" title="Valid IFSC format e.g. HDFC0001234">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-500">Branch Name</label>
+                        <input type="text" name="branchName" class="form-control"
+                               placeholder="e.g. Connaught Place, Delhi">
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center">
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" name="isPrimary" id="isPrimary" value="true">
+                            <label class="form-check-label fw-500" for="isPrimary">
+                                Set as primary account
+                            </label>
+                            <div class="text-muted" style="font-size:0.8rem;">Primary account receives payouts</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security note -->
+                <div class="security-note mt-4">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    Account numbers are encrypted at rest (AES-256) and verified via penny-drop before activation.
+                    Your data is never shared with third parties.
+                </div>
+
+                <!-- Navigation -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a th:href="@{/business-profile/status}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Status
+                    </a>
+                    <div class="d-flex gap-2">
+                        <a th:href="@{/business-profile/subscription(profileId=${profileId})}"
+                           class="btn btn-outline-primary">
+                            Skip for now <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Save &amp; Continue
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Auto-uppercase IFSC
+    document.querySelector('[name="ifscCode"]').addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+</script>
+</body>
+</html>

@@ -22,7 +22,7 @@ public class HomeController {
 	@Autowired
 	private ItemIssuanceService itemIssuanceService;
 	
-	@GetMapping("/")
+	@GetMapping("/dashboard")
 	public String Index(){
 		return "index";
 	}

@@ -85,6 +85,20 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Transactional
+    public void saveRegistrationHints(Long userId, String businessName, String businessType,
+                                       String gstHint, String phone, String address) {
+        userRepository.findById(userId).ifPresent(user -> {
+            user.setRegistrationBusinessName(businessName);
+            user.setRegistrationBusinessType(businessType);
+            user.setRegistrationGstHint(gstHint);
+            user.setRegistrationPhone(phone);
+            user.setRegistrationAddress(address);
+            userRepository.save(user);
+        });
+    }
+
+    @Override
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);
     }

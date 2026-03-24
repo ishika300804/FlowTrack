@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — FlowTrack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #f1f5f9; min-height: 100vh; }
+
+        /* ── Top Nav ── */
+        .admin-nav {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            padding: 0.9rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+        }
+        .admin-nav .brand { font-size: 1.15rem; font-weight: 700; color: white; text-decoration: none; }
+        .admin-nav .brand i { color: #667eea; margin-right: 8px; }
+        .admin-nav .admin-badge {
+            background: rgba(102,126,234,0.25);
+            border: 1px solid rgba(102,126,234,0.5);
+            color: #a3bffa; font-size: 0.75rem; font-weight: 600;
+            padding: 0.25rem 0.75rem; border-radius: 50px;
+        }
+
+        /* ── Hero Banner ── */
+        .admin-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2.5rem 2rem; color: white;
+        }
+        .admin-hero h2 { font-weight: 800; margin: 0 0 0.25rem; }
+        .admin-hero p  { opacity: 0.85; margin: 0; font-size: 0.95rem; }
+
+        /* ── Metric Cards ── */
+        .metric-card {
+            background: white; border-radius: 16px;
+            padding: 1.5rem; text-align: center;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .metric-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+        .metric-card .num { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+        .metric-card .lbl { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em;
+                            color: #718096; font-weight: 600; margin-top: 0.3rem; }
+
+        /* ── Quick-action Cards ── */
+        .action-card {
+            background: white; border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 1.75rem 1.5rem;
+            display: flex; flex-direction: column; height: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .action-card:hover { border-color: #667eea; box-shadow: 0 6px 20px rgba(102,126,234,0.15); }
+        .action-card .icon-wrap {
+            width: 52px; height: 52px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; margin-bottom: 1rem;
+        }
+        .action-card h6 { font-weight: 700; margin-bottom: 0.3rem; color: #2d3748; }
+        .action-card p  { font-size: 0.85rem; color: #718096; flex-grow: 1; margin: 0 0 1.25rem; }
+        .btn-action {
+            border-radius: 50px; font-weight: 600;
+            font-size: 0.85rem; padding: 0.55rem 1.25rem;
+            border: 2px solid; text-decoration: none;
+            display: inline-block; text-align: center;
+            transition: all 0.2s;
+        }
+
+        /* pending badge pulse */
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+        .pulse { animation: pulse 1.8s ease-in-out infinite; }
+
+        .content-wrap { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+    </style>
+</head>
+<body>
+
+<!-- Top Nav -->
+<nav class="admin-nav">
+    <a class="brand" href="/admin/dashboard">
+        <i class="fas fa-warehouse"></i>FlowTrack
+    </a>
+    <div class="d-flex align-items-center gap-3">
+        <span class="admin-badge"><i class="fas fa-shield-alt me-1"></i>Platform Admin</span>
+        <span class="text-white-50" style="font-size:0.85rem;" th:text="${adminName}">Admin</span>
+        <a href="/logout"
+           class="btn btn-sm"
+           style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.25);border-radius:50px;padding:0.3rem 0.9rem;font-size:0.8rem;">
+            <i class="fas fa-sign-out-alt me-1"></i>Logout
+        </a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<div class="admin-hero">
+    <div class="content-wrap py-0" style="max-width:1200px;">
+        <h2>Welcome back, <span th:text="${adminName}">Admin</span> 👋</h2>
+        <p>Here's an overview of the FlowTrack platform. Review pending verifications and manage users below.</p>
+    </div>
+</div>
+
+<div class="content-wrap">
+
+    <!-- Metric Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="metric-card">
+                <div class="num text-primary" th:text="${totalUsers}">0</div>
+                <div class="lbl">Total Users</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="metric-card">
+                <div class="num" style="color:#805ad5;" th:text="${totalProfiles}">0</div>
+                <div class="lbl">Biz Profiles</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="metric-card" style="border-color:#fbd38d;">
+                <div class="num text-warning pulse" th:text="${pendingCount}">0</div>
+                <div class="lbl">Pending Review</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="metric-card">
+                <div class="num text-success" th:text="${verifiedCount}">0</div>
+                <div class="lbl">Verified</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="metric-card">
+                <div class="num text-danger" th:text="${rejectedCount}">0</div>
+                <div class="lbl">Rejected</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="metric-card">
+                <div class="num" style="color:#718096;" th:text="${legacyUsers}">0</div>
+                <div class="lbl">Legacy Users</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Alert -->
+    <div th:if="${pendingCount > 0}"
+         class="alert d-flex align-items-center gap-3 mb-4"
+         style="background:#fffbeb;border:1px solid #f6c026;border-radius:14px;padding:1rem 1.5rem;">
+        <i class="fas fa-bell" style="color:#d69e2e;font-size:1.4rem;"></i>
+        <div>
+            <strong style="color:#744210;">
+                <span th:text="${pendingCount}">0</span> business
+                <span th:text="${pendingCount == 1} ? 'profile is' : 'profiles are'">profiles are</span>
+                waiting for your verification.
+            </strong>
+            <span class="ms-2" style="font-size:0.9rem;color:#744210;">Review and approve or reject them now.</span>
+        </div>
+        <a href="/admin/onboarding/pending-approvals"
+           class="btn ms-auto"
+           style="background:#d69e2e;color:white;border-radius:50px;padding:0.5rem 1.25rem;font-weight:600;white-space:nowrap;">
+            Review Now <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <h6 class="text-muted mb-3 text-uppercase" style="font-size:0.75rem;letter-spacing:0.08em;font-weight:700;">
+        <i class="fas fa-th me-1"></i> Admin Actions
+    </h6>
+    <div class="row g-3">
+
+        <!-- Pending Approvals -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="action-card">
+                <div class="icon-wrap" style="background:#fefcbf;">
+                    <i class="fas fa-clipboard-check" style="color:#d69e2e;"></i>
+                </div>
+                <h6>Pending Approvals</h6>
+                <p>Review business profiles submitted for verification. Approve or reject with a reason.</p>
+                <a href="/admin/onboarding/pending-approvals"
+                   class="btn-action"
+                   style="border-color:#d69e2e;color:#d69e2e;">
+                    <i class="fas fa-arrow-right me-1"></i>Open Queue
+                    <span th:if="${pendingCount > 0}"
+                          class="badge ms-1"
+                          style="background:#d69e2e;color:white;font-size:0.75rem;"
+                          th:text="${pendingCount}">0</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Onboarding Dashboard -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="action-card">
+                <div class="icon-wrap" style="background:#ebf4ff;">
+                    <i class="fas fa-chart-bar" style="color:#3182ce;"></i>
+                </div>
+                <h6>Onboarding Dashboard</h6>
+                <p>Full funnel metrics — how many users have profiles, which stage they're at, conversion rates.</p>
+                <a href="/admin/onboarding/dashboard"
+                   class="btn-action"
+                   style="border-color:#3182ce;color:#3182ce;">
+                    <i class="fas fa-arrow-right me-1"></i>View Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Status Report -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="action-card">
+                <div class="icon-wrap" style="background:#f0fff4;">
+                    <i class="fas fa-list-alt" style="color:#38a169;"></i>
+                </div>
+                <h6>Onboarding Status Report</h6>
+                <p>Breakdown of all business profiles by verification status and onboarding stage.</p>
+                <a href="/admin/onboarding/status-report"
+                   class="btn-action"
+                   style="border-color:#38a169;color:#38a169;">
+                    <i class="fas fa-arrow-right me-1"></i>View Report
+                </a>
+            </div>
+        </div>
+
+        <!-- Legacy Users -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="action-card">
+                <div class="icon-wrap" style="background:#faf5ff;">
+                    <i class="fas fa-users-slash" style="color:#805ad5;"></i>
+                </div>
+                <h6>Legacy Users</h6>
+                <p>Users registered before the onboarding system. They have no business profile yet.</p>
+                <a href="/admin/onboarding/legacy-users"
+                   class="btn-action"
+                   style="border-color:#805ad5;color:#805ad5;">
+                    <i class="fas fa-arrow-right me-1"></i>View List
+                    <span th:if="${legacyUsers > 0}"
+                          class="badge ms-1"
+                          style="background:#805ad5;color:white;font-size:0.75rem;"
+                          th:text="${legacyUsers}">0</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- User Management -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="action-card">
+                <div class="icon-wrap" style="background:#fff5f5;">
+                    <i class="fas fa-users-cog" style="color:#e53e3e;"></i>
+                </div>
+                <h6>User Management</h6>
+                <p>View all registered users, manage accounts, roles, and access rights.</p>
+                <a href="/admin/users"
+                   class="btn-action"
+                   style="border-color:#e53e3e;color:#e53e3e;">
+                    <i class="fas fa-arrow-right me-1"></i>Manage Users
+                </a>
+            </div>
+        </div>
+
+        <!-- Logout -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="action-card" style="background:#f8fafc;">
+                <div class="icon-wrap" style="background:#edf2f7;">
+                    <i class="fas fa-sign-out-alt" style="color:#718096;"></i>
+                </div>
+                <h6 style="color:#718096;">Sign Out</h6>
+                <p style="color:#a0aec0;">End your admin session securely.</p>
+                <a href="/logout"
+                   class="btn-action"
+                   style="border-color:#718096;color:#718096;">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <p class="text-muted text-center mt-5" style="font-size:0.8rem;">
+        FlowTrack Platform Admin &nbsp;·&nbsp; All actions are logged &nbsp;·&nbsp;
+        <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy HH:mm')}"></span>
+    </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

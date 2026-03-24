@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  Onboarding Banner Fragment
+  Usage: <div th:replace="fragments/banner :: onboardingBanner"></div>
+
+  Expected model attributes (set by OnboardingBannerInterceptor):
+    onboardingBanner.show       — boolean
+    onboardingBanner.type       — Bootstrap contextual class: info | warning | danger | success
+    onboardingBanner.title      — Banner heading
+    onboardingBanner.message    — Body text
+    onboardingBanner.actionUrl  — CTA href
+    onboardingBanner.actionText — CTA button label
+-->
+<div th:fragment="onboardingBanner"
+     th:if="${onboardingBanner != null and onboardingBanner.show}"
+     th:id="'onboardingBannerAlert'"
+     th:classappend="'alert alert-' + ${onboardingBanner.type} + ' alert-dismissible fade show mb-0 rounded-0 border-0'"
+     role="alert"
+     style="border-left: 4px solid currentColor !important;">
+
+    <!-- Icon based on type -->
+    <span th:if="${onboardingBanner.type == 'danger'}"><i class="fas fa-exclamation-circle mr-2"></i></span>
+    <span th:if="${onboardingBanner.type == 'warning'}"><i class="fas fa-exclamation-triangle mr-2"></i></span>
+    <span th:if="${onboardingBanner.type == 'info'}"><i class="fas fa-info-circle mr-2"></i></span>
+    <span th:if="${onboardingBanner.type == 'success'}"><i class="fas fa-check-circle mr-2"></i></span>
+
+    <strong th:text="${onboardingBanner.title}">Banner Title</strong>
+    <span th:text="' — ' + ${onboardingBanner.message}">Banner message</span>
+
+    <!-- CTA Button -->
+    <a th:href="${onboardingBanner.actionUrl}"
+       th:text="${onboardingBanner.actionText}"
+       class="btn btn-sm ml-3"
+       th:classappend="${onboardingBanner.type == 'danger'} ? 'btn-danger' :
+                        (${onboardingBanner.type == 'warning'} ? 'btn-warning' :
+                        (${onboardingBanner.type == 'success'} ? 'btn-success' : 'btn-info'))">
+        Take Action
+    </a>
+
+    <!-- Dismiss Button — calls POST endpoint via JS, then hides the banner -->
+    <button type="button"
+            class="close"
+            aria-label="Dismiss"
+            onclick="dismissOnboardingBanner()">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<!-- Dismiss script (only rendered when banner is present) -->
+<script th:if="${onboardingBanner != null and onboardingBanner.show}" th:inline="javascript">
+    function dismissOnboardingBanner() {
+        fetch('/onboarding/banner/dismiss', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-Token': document.querySelector('meta[name="_csrf"]') ?
+                    document.querySelector('meta[name="_csrf"]').getAttribute('content') : '',
+                'Content-Type': 'application/json'
+            }
+        }).then(function() {
+            var banner = document.getElementById('onboardingBannerAlert');
+            if (banner) { banner.style.display = 'none'; }
+        }).catch(function(e) {
+            // Silent fail — just hide visually
+            var banner = document.getElementById('onboardingBannerAlert');
+            if (banner) { banner.style.display = 'none'; }
+        });
+    }
+</script>
+
+</body>
+</html>

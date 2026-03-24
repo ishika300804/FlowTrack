@@ -18,6 +18,7 @@ import com.example.IMS.model.Borrower;
 import com.example.IMS.model.Item;
 import com.example.IMS.model.Loan;
 import com.example.IMS.service.BorrowerService;
+import com.example.IMS.service.EmailService;
 import com.example.IMS.service.ItemIssuanceService;
 import com.example.IMS.service.ItemService;
 
@@ -35,6 +36,9 @@ public class ItemReturnController {
 
 	@Autowired
 	private ItemIssuanceConvertor itemIssuanceConvertor;
+
+	@Autowired
+	private EmailService emailService;
 
 	@GetMapping("/ItemReturnView")
 	public String Index(Model model) {
@@ -81,6 +85,19 @@ public class ItemReturnController {
 			item.increaseQuantity();
 			itemService.saveItem(item);
 			itemIssuanceService.saveItemIssued(loan);
+
+			// E-16: notify borrower of return acknowledgment
+			try {
+				if (borrower.getEmail() != null && !borrower.getEmail().isBlank()) {
+					emailService.sendItemReturnedEmail(
+							borrower.getEmail(),
+							borrower.getFirstName() + " " + borrower.getLastName(),
+							item.getName(),
+							loan.getTotalFine());
+				}
+			} catch (Exception mailEx) {
+				System.err.println("E-16 email failed: " + mailEx.getMessage());
+			}
 		} catch (NullPointerException e) {
 			System.out.println("Null Pointer Exception Caught in Item Return Controller.");
 			err = "Loan ID does not exist. Invalid input";

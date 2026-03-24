@@ -23,7 +23,12 @@ public class ChatbotDatabaseService {
 
     private final Gson gson = new Gson();
 
-    public String executeFunction(String functionName, Map<String, Object> arguments) {
+    /**
+     * Execute a Gemini function-call with user context.
+     * ctx is used to scope data appropriately (e.g. retailer vs admin).
+     */
+    public String executeFunction(String functionName, Map<String, Object> arguments,
+                                  GeminiChatService.ChatUserContext ctx) {
         try {
             switch (functionName) {
                 case "getAllInventoryItems":

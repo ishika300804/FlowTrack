@@ -1,0 +1,390 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retailer Dashboard - FlowTrack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: "Inter", sans-serif; background: #f1f5f9; margin: 0; }
+        .sidebar { width:260px; min-height:100vh; background:linear-gradient(180deg,#0f172a,#1e293b); position:fixed; top:0; left:0; display:flex; flex-direction:column; z-index:100; overflow-y:auto; }
+        .sidebar-brand { padding:1.4rem 1.4rem 0.9rem; border-bottom:1px solid rgba(255,255,255,0.08); }
+        .sidebar-brand h4 { font-weight:800; margin:0; font-size:1.1rem; color:#fff; }
+        .sidebar-brand small { opacity:0.5; font-size:0.72rem; color:#fff; }
+        .sidebar-nav { padding:0.75rem 0; flex:1; }
+        .nav-section-label { padding:0.6rem 1.4rem 0.25rem; font-size:0.67rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:rgba(255,255,255,0.35); margin-top:0.5rem; }
+        .sidebar a { display:flex; align-items:center; gap:0.75rem; padding:0.55rem 1.4rem; color:rgba(255,255,255,0.65); text-decoration:none; font-size:0.875rem; transition:all 0.18s; border-left:3px solid transparent; }
+        .sidebar a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+        .sidebar a.active { background:rgba(99,102,241,0.18); color:#a5b4fc; border-left-color:#6366f1; }
+        .sidebar a i { width:18px; text-align:center; font-size:0.875rem; }
+        .sidebar-footer { padding:1rem 1.4rem; border-top:1px solid rgba(255,255,255,0.08); }
+        .sub-pill { margin:0.5rem 0.9rem 0; border-radius:10px; padding:0.55rem 0.9rem; font-size:0.78rem; }
+        .sub-pill.active  { background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); color:#86efac; }
+        .sub-pill.inactive{ background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.25); color:#fca5a5; }
+        .sub-pill .plan-name { font-weight:700; font-size:0.85rem; }
+        .main-content { margin-left:260px; min-height:100vh; }
+        .topbar { background:#fff; border-bottom:1px solid #e2e8f0; padding:0.875rem 2rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+        .topbar h5 { margin:0; font-weight:700; color:#0f172a; font-size:1rem; }
+        .page-body { padding:1.75rem 2rem; }
+        .info-banner { border-radius:14px; padding:1.1rem 1.4rem; display:flex; align-items:flex-start; gap:1rem; }
+        .info-banner.setup   { background:#eff6ff; border:1px solid #bfdbfe; border-left:4px solid #3b82f6; }
+        .info-banner.pending { background:#fefce8; border:1px solid #fde68a; border-left:4px solid #f59e0b; }
+        .info-banner.sub-warn{ background:#fff1f2; border:1px solid #fecdd3; border-left:4px solid #f43f5e; }
+        .stepper { display:flex; align-items:center; max-width:480px; margin-top:0.75rem; }
+        .step-node { display:flex; flex-direction:column; align-items:center; }
+        .step-dot { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:0.78rem; flex-shrink:0; }
+        .step-dot.done  { background:#22c55e; color:#fff; }
+        .step-dot.active{ background:#3b82f6; color:#fff; box-shadow:0 0 0 4px rgba(59,130,246,0.2); }
+        .step-dot.idle  { background:#e2e8f0; color:#94a3b8; }
+        .step-lbl { font-size:0.7rem; color:#64748b; margin-top:0.3rem; white-space:nowrap; }
+        .step-line { flex:1; height:2px; background:#e2e8f0; margin:0 0.35rem 1.2rem; }
+        .step-line.done { background:#22c55e; }
+        .kpi-card { background:#fff; border-radius:16px; padding:1.3rem; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.06); transition:transform 0.2s,box-shadow 0.2s; }
+        .kpi-card:hover { transform:translateY(-3px); box-shadow:0 6px 18px rgba(0,0,0,0.09); }
+        .kpi-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; margin-bottom:0.8rem; }
+        .kpi-val { font-size:1.8rem; font-weight:800; color:#0f172a; line-height:1; }
+        .kpi-lbl { font-size:0.82rem; color:#64748b; margin-top:0.25rem; }
+        .kpi-sub { font-size:0.75rem; color:#94a3b8; margin-top:0.12rem; }
+        .section-title { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.09em; color:#94a3b8; margin-bottom:0.8rem; }
+        .action-card { display:flex; align-items:center; gap:0.9rem; background:#fff; border-radius:12px; padding:1rem 1.1rem; text-decoration:none; color:inherit; border:1px solid #e2e8f0; transition:all 0.18s; }
+        .action-card:hover { border-color:#6366f1; box-shadow:0 4px 14px rgba(99,102,241,0.12); transform:translateX(3px); color:inherit; }
+        .action-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.05rem; flex-shrink:0; }
+        .action-title { font-size:0.875rem; font-weight:600; }
+        .action-sub   { font-size:0.78rem; color:#94a3b8; }
+        .analytics-card { background:#fff; border-radius:16px; padding:1.4rem; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+        .analytics-card h6 { font-weight:700; font-size:0.95rem; color:#0f172a; margin-bottom:0.2rem; }
+        .analytics-card small { color:#94a3b8; font-size:0.8rem; }
+        .profile-card { background:#fff; border-radius:16px; padding:1.4rem; border:1px solid #e2e8f0; }
+        .item-row { display:flex; align-items:center; gap:0.75rem; padding:0.6rem 0; border-bottom:1px solid #f1f5f9; }
+        .item-row:last-child { border-bottom:none; }
+        .item-rank { width:22px; height:22px; border-radius:6px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:700; color:#64748b; flex-shrink:0; }
+        .item-name  { flex:1; font-size:0.85rem; font-weight:500; color:#1e293b; }
+        .item-qty   { font-size:0.78rem; color:#64748b; white-space:nowrap; }
+        .item-val   { font-size:0.85rem; font-weight:700; color:#0f172a; white-space:nowrap; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <h4><i class="fas fa-warehouse me-2"></i>FlowTrack</h4>
+        <small>Retailer Portal</small>
+    </div>
+    <div th:if="${hasSubscription}" class="sub-pill active mt-2">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-crown" style="color:#fbbf24;font-size:0.85rem;"></i>
+            <div>
+                <div class="plan-name" th:text="${subscriptionPlan + ' Plan'}">PLAN</div>
+                <div style="font-size:0.7rem;opacity:0.75;">Expires <span th:text="${#temporals.format(subscriptionExpiry,'dd MMM yyyy')}">—</span></div>
+            </div>
+        </div>
+    </div>
+    <div th:unless="${hasSubscription}" class="sub-pill inactive mt-2">
+        <i class="fas fa-exclamation-circle me-1"></i><span>No active subscription</span>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="/retailer/dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="/business-profile/status"><i class="fas fa-building"></i> Business Profile</a>
+        <div class="nav-section-label">Inventory</div>
+        <a href="/retailer/inventory/add"><i class="fas fa-plus-circle"></i> Add Item</a>
+        <a href="/retailer/inventory"><i class="fas fa-boxes"></i> View Inventory</a>
+        <a href="/vendors"><i class="fas fa-truck"></i> My Suppliers</a>
+        <div class="nav-section-label">Finance</div>
+        <a th:href="${hasProfile ? '/business-profile/bank?profileId=' + primaryProfile?.id : '/business-profile/create'}"><i class="fas fa-university"></i> Bank Details</a>
+        <a th:href="${hasProfile ? '/business-profile/subscription?profileId=' + primaryProfile?.id : '/business-profile/create'}"><i class="fas fa-crown"></i> Subscription</a>
+        <div class="nav-section-label">Reports</div>
+        <a href="/reports"><i class="fas fa-chart-bar"></i> Reports</a>
+        <div class="nav-section-label">Account</div>
+        <a href="/onboarding/required"><i class="fas fa-tasks"></i> Onboarding</a>
+    </nav>
+    <div class="sidebar-footer">
+        <a th:href="@{/logout}" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;">
+            <i class="fas fa-sign-out-alt me-2"></i> Sign Out
+        </a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <h5>Dashboard</h5>
+            <div class="text-muted" style="font-size:0.8rem;">Welcome back, <strong th:text="${user.firstName != null ? user.firstName : user.username}">User</strong></div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span th:if="${hasSubscription}" class="badge text-bg-success" th:text="${subscriptionPlan + ' Plan'}">PLAN</span>
+            <span th:unless="${hasSubscription}" class="badge text-bg-warning text-dark">No Subscription</span>
+            <span class="badge text-bg-primary">RETAILER</span>
+            <a th:href="@{/logout}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <!-- No Profile Banner -->
+        <div th:if="${!hasProfile}" class="info-banner setup mb-4">
+            <i class="fas fa-rocket" style="color:#3b82f6;font-size:1.3rem;margin-top:2px;flex-shrink:0;"></i>
+            <div>
+                <strong>Complete your business setup</strong>
+                <p class="mb-2 mt-1" style="color:#475569;font-size:0.875rem;">Create a business profile to unlock inventory, supplier connections, and analytics.</p>
+                <a th:href="@{/business-profile/create}" class="btn btn-primary btn-sm"><i class="fas fa-plus-circle me-1"></i> Create Business Profile</a>
+            </div>
+        </div>
+
+        <!-- Verification Pending Banner -->
+        <div th:if="${hasProfile and !isVerified}" class="info-banner pending mb-4">
+            <i class="fas fa-shield-alt" style="color:#f59e0b;font-size:1.3rem;flex-shrink:0;margin-top:2px;"></i>
+            <div class="flex-grow-1">
+                <strong>Verification in progress</strong>
+                <p class="mb-2 mt-1" style="color:#475569;font-size:0.875rem;">Your business profile is under review. Full access unlocks after verification.</p>
+                <div class="stepper">
+                    <div class="step-node"><div class="step-dot done"><i class="fas fa-check" style="font-size:0.75rem;"></i></div><div class="step-lbl">Created</div></div>
+                    <div th:class="${profileStatus?.name() == 'PENDING' or profileStatus?.name() == 'VERIFIED'} ? 'step-line done' : 'step-line'"></div>
+                    <div class="step-node">
+                        <div th:class="${profileStatus?.name() == 'PENDING' or profileStatus?.name() == 'VERIFIED'} ? 'step-dot done' : 'step-dot active'">
+                            <i class="fas fa-check" style="font-size:0.75rem;" th:if="${profileStatus?.name() == 'PENDING' or profileStatus?.name() == 'VERIFIED'}"></i>
+                            <span th:unless="${profileStatus?.name() == 'PENDING' or profileStatus?.name() == 'VERIFIED'}">2</span>
+                        </div>
+                        <div class="step-lbl">Submitted</div>
+                    </div>
+                    <div th:class="${profileStatus?.name() == 'VERIFIED'} ? 'step-line done' : 'step-line'"></div>
+                    <div class="step-node">
+                        <div th:class="${profileStatus?.name() == 'VERIFIED'} ? 'step-dot done' : 'step-dot idle'">
+                            <i class="fas fa-check" style="font-size:0.75rem;" th:if="${profileStatus?.name() == 'VERIFIED'}"></i>
+                            <span th:unless="${profileStatus?.name() == 'VERIFIED'}">3</span>
+                        </div>
+                        <div class="step-lbl">Verified</div>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step-node"><div class="step-dot idle">4</div><div class="step-lbl">Active</div></div>
+                </div>
+            </div>
+            <a th:href="@{/business-profile/status}" class="btn btn-warning btn-sm flex-shrink-0">View Status</a>
+        </div>
+
+        <!-- No Subscription Warning -->
+        <div th:if="${hasProfile and !hasSubscription}" class="info-banner sub-warn mb-4">
+            <i class="fas fa-crown" style="color:#f43f5e;font-size:1.3rem;flex-shrink:0;margin-top:2px;"></i>
+            <div class="flex-grow-1">
+                <strong>No active subscription</strong>
+                <p class="mb-0 mt-1" style="color:#475569;font-size:0.875rem;">Subscribe to unlock inventory management, analytics, and supplier tools.</p>
+            </div>
+            <a th:href="${'/business-profile/subscription?profileId=' + primaryProfile?.id}" class="btn btn-danger btn-sm flex-shrink-0">
+                <i class="fas fa-crown me-1"></i> Subscribe Now
+            </a>
+        </div>
+
+        <!-- KPI Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background:#eff6ff;"><i class="fas fa-boxes" style="color:#3b82f6;"></i></div>
+                    <div class="kpi-val" th:text="${stats.totalItems}">0</div>
+                    <div class="kpi-lbl">Total Items</div>
+                    <div class="kpi-sub" th:text="${stats.inStock + ' in stock'}">0 in stock</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background:#f0fdf4;"><i class="fas fa-rupee-sign" style="color:#22c55e;"></i></div>
+                    <div class="kpi-val" style="font-size:1.45rem;" th:text="${'&#8377;' + #numbers.formatDecimal(stats.stockValue,1,'COMMA',0,'POINT')}">&#8377;0</div>
+                    <div class="kpi-lbl">Inventory Value</div>
+                    <div class="kpi-sub">Current stock × unit price</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background:#fff7ed;"><i class="fas fa-exclamation-triangle" style="color:#f97316;"></i></div>
+                    <div class="kpi-val" th:text="${stats.lowStock}">0</div>
+                    <div class="kpi-lbl">Low Stock Alerts</div>
+                    <div class="kpi-sub" th:text="${stats.outOfStock + ' out of stock'}">0 out of stock</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background:#fdf4ff;"><i class="fas fa-truck" style="color:#a855f7;"></i></div>
+                    <div class="kpi-val" th:text="${stats.activeVendors}">0</div>
+                    <div class="kpi-lbl">Active Suppliers</div>
+                    <div class="kpi-sub" th:text="${stats.totalIssued + ' items issued'}">0 issued</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-7">
+                <div class="analytics-card h-100">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div>
+                            <h6>Stock Value Distribution</h6>
+                            <small>Top 5 items by inventory value (qty × unit price)</small>
+                        </div>
+                        <span class="badge text-bg-light border" style="font-size:0.7rem;">Live</span>
+                    </div>
+                    <canvas id="stockChart" height="195"></canvas>
+                    <div th:if="${stats.stockDistribution.isEmpty()}" class="text-center text-muted py-4">
+                        <i class="fas fa-box-open fa-2x mb-2 d-block" style="opacity:0.3;"></i>
+                        No inventory data yet.
+                        <a href="/retailer/inventory/add" class="d-block mt-2 btn btn-sm btn-outline-primary">Add first item</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="analytics-card h-100">
+                    <div class="mb-3">
+                        <h6>Top Items by Value</h6>
+                        <small>Highest-value SKUs in your inventory</small>
+                    </div>
+                    <div th:if="${stats.topItems.empty}" class="text-center text-muted py-4">No items found.</div>
+                    <div th:unless="${stats.topItems.empty}">
+                        <div th:each="entry,iter : ${stats.topItems}" class="item-row">
+                            <div class="item-rank" th:text="${iter.index + 1}">1</div>
+                            <div class="item-name" th:text="${entry.name}">Item</div>
+                            <div class="item-qty" th:text="${entry.quantity + ' units'}">0 units</div>
+                            <div class="item-val" th:text="${'&#8377;' + #numbers.formatDecimal(entry.totalValue,1,'COMMA',0,'POINT')}">&#8377;0</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top">
+                        <div class="d-flex justify-content-between" style="font-size:0.82rem;">
+                            <span class="text-muted">Total Inventory Value</span>
+                            <strong th:text="${'&#8377;' + #numbers.formatDecimal(stats.stockValue,1,'COMMA',0,'POINT')}">&#8377;0</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1" style="font-size:0.82rem;">
+                            <span class="text-muted">Items Issued (All Time)</span>
+                            <strong th:text="${stats.totalIssued}">0</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1" style="font-size:0.82rem;">
+                            <span class="text-muted">Fine Collected</span>
+                            <strong th:text="${'&#8377;' + #numbers.formatDecimal(stats.fineCollected,1,'COMMA',2,'POINT')}">&#8377;0.00</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions + Profile -->
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="section-title">Quick Actions</div>
+                <div class="d-flex flex-column gap-2">
+                    <a href="/retailer/inventory/add" class="action-card">
+                        <div class="action-icon" style="background:#eff6ff;"><i class="fas fa-plus" style="color:#3b82f6;"></i></div>
+                        <div><div class="action-title">Add Inventory Item</div><div class="action-sub">Track new stock</div></div>
+                        <i class="fas fa-chevron-right ms-auto text-muted" style="font-size:0.7rem;"></i>
+                    </a>
+                    <a href="/retailer/inventory" class="action-card">
+                        <div class="action-icon" style="background:#f0fdf4;"><i class="fas fa-boxes" style="color:#22c55e;"></i></div>
+                        <div><div class="action-title">View Inventory</div><div class="action-sub">Browse and manage items</div></div>
+                        <i class="fas fa-chevron-right ms-auto text-muted" style="font-size:0.7rem;"></i>
+                    </a>
+                    <a href="/vendors" class="action-card">
+                        <div class="action-icon" style="background:#fdf4ff;"><i class="fas fa-handshake" style="color:#a855f7;"></i></div>
+                        <div><div class="action-title">Manage Suppliers</div><div class="action-sub">View and connect</div></div>
+                        <i class="fas fa-chevron-right ms-auto text-muted" style="font-size:0.7rem;"></i>
+                    </a>
+                    <a href="/reports" class="action-card">
+                        <div class="action-icon" style="background:#fff7ed;"><i class="fas fa-chart-bar" style="color:#f97316;"></i></div>
+                        <div><div class="action-title">View Reports</div><div class="action-sub">Stock and analytics</div></div>
+                        <i class="fas fa-chevron-right ms-auto text-muted" style="font-size:0.7rem;"></i>
+                    </a>
+                    <a th:if="${!hasSubscription and hasProfile}"
+                       th:href="${'/business-profile/subscription?profileId=' + primaryProfile?.id}"
+                       class="action-card" style="border-color:#f43f5e;">
+                        <div class="action-icon" style="background:#fff1f2;"><i class="fas fa-crown" style="color:#f43f5e;"></i></div>
+                        <div><div class="action-title">Choose Subscription</div><div class="action-sub">Unlock all features</div></div>
+                        <i class="fas fa-chevron-right ms-auto text-muted" style="font-size:0.7rem;"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="section-title">Business Profile</div>
+                <div th:if="${!hasProfile}" class="profile-card text-center py-5">
+                    <i class="fas fa-building fa-2x d-block mb-3" style="opacity:0.25;"></i>
+                    <p class="text-muted mb-3" style="font-size:0.9rem;">No business profile set up yet.</p>
+                    <a th:href="@{/business-profile/create}" class="btn btn-primary btn-sm"><i class="fas fa-plus-circle me-1"></i> Create Profile</a>
+                </div>
+                <div th:if="${hasProfile}" class="profile-card">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div>
+                            <div style="font-weight:700;font-size:1.05rem;" th:text="${primaryProfile.legalBusinessName}">Business Name</div>
+                            <div class="text-muted" style="font-size:0.85rem;" th:text="${primaryProfile.businessType}">Type</div>
+                        </div>
+                        <span th:switch="${profileStatus?.name()}">
+                            <span th:case="'VERIFIED'" class="badge text-bg-success">Verified</span>
+                            <span th:case="'PENDING'"  class="badge text-bg-warning text-dark">Pending Review</span>
+                            <span th:case="'REJECTED'" class="badge text-bg-danger">Rejected</span>
+                            <span th:case="*"          class="badge text-bg-secondary">Draft</span>
+                        </span>
+                    </div>
+                    <div class="row g-2 mb-3" style="font-size:0.85rem;">
+                        <div class="col-6"><div class="text-muted">GSTIN</div><strong th:text="${primaryProfile.gstin}">—</strong></div>
+                        <div class="col-6"><div class="text-muted">State</div><strong th:text="${primaryProfile.state}">—</strong></div>
+                        <div class="col-6">
+                            <div class="text-muted">Subscription</div>
+                            <strong th:if="${hasSubscription}" class="text-success" th:text="${subscriptionPlan + ' (Active)'}">—</strong>
+                            <strong th:unless="${hasSubscription}" class="text-danger">None</strong>
+                        </div>
+                        <div class="col-6" th:if="${hasSubscription}">
+                            <div class="text-muted">Expires</div>
+                            <strong th:text="${#temporals.format(subscriptionExpiry,'dd MMM yyyy')}">—</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a th:href="@{/business-profile/status}" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye me-1"></i> View Details</a>
+                        <a th:href="${'/business-profile/bank?profileId=' + primaryProfile.id}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-university me-1"></i> Bank Details</a>
+                        <a th:href="${'/business-profile/subscription?profileId=' + primaryProfile.id}"
+                           th:class="${hasSubscription} ? 'btn btn-outline-success btn-sm' : 'btn btn-danger btn-sm'">
+                            <i class="fas fa-crown me-1"></i><span th:text="${hasSubscription ? 'Renew Plan' : 'Subscribe'}">Subscribe</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+const stockDistribution = /*[[${stats.stockDistribution}]]*/ {};
+if (Object.keys(stockDistribution).length > 0) {
+    const ctx = document.getElementById("stockChart");
+    if (ctx) {
+        new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: Object.keys(stockDistribution),
+                datasets: [{
+                    label: "Stock Value",
+                    data: Object.values(stockDistribution),
+                    backgroundColor: ["#6366f1","#22c55e","#f97316","#f43f5e","#a855f7"],
+                    borderRadius: 8, borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: c => "\u20B9" + c.parsed.y.toLocaleString("en-IN") } }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { callback: v => "\u20B9" + Number(v).toLocaleString("en-IN"), font: {size:11} }, grid: { color:"#f1f5f9" } },
+                    x: { grid: { display: false }, ticks: { font: {size:11} } }
+                }
+            }
+        });
+    }
+}
+/*]]>*/
+</script>
+<script src="/js/chatbot.js"></script>
+</body>
+</html>
+

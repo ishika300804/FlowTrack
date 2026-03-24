@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway Test - FlowTrack</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .result.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .payment-info {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="mb-4">💳 Payment Gateway Test</h1>
+        <p class="text-muted">Test the Razorpay payment integration in FlowTrack</p>
+        <hr>
+
+        <!-- Payment Configuration Info -->
+        <div class="alert alert-info">
+            <h5>⚠️ Before Testing:</h5>
+            <ol>
+                <li>Make sure you have configured Razorpay Key ID and Secret in <code>application.properties</code></li>
+                <li>For testing, use Razorpay Test Mode credentials</li>
+                <li>Test card: 4111 1111 1111 1111, CVV: any 3 digits, Expiry: any future date</li>
+            </ol>
+        </div>
+
+        <!-- Create Payment Order -->
+        <div class="test-section">
+            <h3>1. Create Test Payment Order</h3>
+            <form id="paymentOrderForm">
+                <div class="mb-3">
+                    <label for="paymentAmount" class="form-label">Amount (INR):</label>
+                    <input type="number" class="form-control" id="paymentAmount" value="100" min="1" step="0.01" required>
+                </div>
+                <div class="mb-3">
+                    <label for="customerName" class="form-label">Customer Name:</label>
+                    <input type="text" class="form-control" id="customerName" value="Test User" required>
+                </div>
+                <div class="mb-3">
+                    <label for="customerEmail" class="form-label">Customer Email:</label>
+                    <input type="email" class="form-control" id="customerEmail" required>
+                </div>
+                <div class="mb-3">
+                    <label for="customerPhone" class="form-label">Customer Phone:</label>
+                    <input type="tel" class="form-control" id="customerPhone" value="9999999999">
+                </div>
+                <div class="mb-3">
+                    <label for="paymentDescription" class="form-label">Description:</label>
+                    <input type="text" class="form-control" id="paymentDescription" value="Test payment for FlowTrack">
+                </div>
+                <button type="submit" class="btn btn-primary">Create Payment Order</button>
+                <div id="orderResult" class="result"></div>
+            </form>
+
+            <div id="paymentInfoDiv" class="payment-info" style="display: none;">
+                <h5>Order Created Successfully!</h5>
+                <p><strong>Order ID:</strong> <span id="orderId"></span></p>
+                <p><strong>Amount:</strong> ₹<span id="orderAmount"></span></p>
+                <p><strong>Status:</strong> <span id="orderStatus"></span></p>
+                <button id="payNowBtn" class="btn btn-success mt-2">Pay Now with Razorpay</button>
+            </div>
+        </div>
+
+        <!-- Payment Verification -->
+        <div class="test-section">
+            <h3>2. Manual Payment Verification</h3>
+            <p class="text-muted">Use this to verify payment signature manually (for testing purposes)</p>
+            <form id="verificationForm">
+                <div class="mb-3">
+                    <label for="verifyOrderId" class="form-label">Order ID:</label>
+                    <input type="text" class="form-control" id="verifyOrderId" required>
+                </div>
+                <div class="mb-3">
+                    <label for="verifyPaymentId" class="form-label">Payment ID:</label>
+                    <input type="text" class="form-control" id="verifyPaymentId" required>
+                </div>
+                <div class="mb-3">
+                    <label for="verifySignature" class="form-label">Signature:</label>
+                    <input type="text" class="form-control" id="verifySignature" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Verify Payment</button>
+                <div id="verificationResult" class="result"></div>
+            </form>
+        </div>
+
+        <!-- Quick Test -->
+        <div class="test-section">
+            <h3>3. Quick Test ₹10 Payment</h3>
+            <p>Click below to quickly test a ₹10 payment</p>
+            <button id="quickTestBtn" class="btn btn-info">Quick Test ₹10 Payment</button>
+            <div id="quickTestResult" class="result"></div>
+        </div>
+
+        <div class="mt-4">
+            <a href="/test/email" class="btn btn-secondary">Go to Email Test</a>
+            <a href="/" class="btn btn-outline-secondary">Back to Home</a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentOrderData = null;
+
+        // Create Payment Order
+        $('#paymentOrderForm').submit(function(e) {
+            e.preventDefault();
+            
+            const paymentData = {
+                amount: parseFloat($('#paymentAmount').val()),
+                currency: 'INR',
+                customerName: $('#customerName').val(),
+                customerEmail: $('#customerEmail').val(),
+                customerPhone: $('#customerPhone').val(),
+                description: $('#paymentDescription').val()
+            };
+
+            $.ajax({
+                url: '/test/payment/create-order',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(paymentData),
+                success: function(response) {
+                    if (response.status === 'failed' || response.status === 'error') {
+                        showResult('#orderResult', 'error', response.message);
+                        $('#paymentInfoDiv').hide();
+                    } else {
+                        currentOrderData = response;
+                        $('#orderId').text(response.orderId);
+                        $('#orderAmount').text(response.amount);
+                        $('#orderStatus').text(response.status);
+                        $('#paymentInfoDiv').show();
+                        showResult('#orderResult', 'success', 'Order created successfully!');
+                    }
+                },
+                error: function(xhr) {
+                    showResult('#orderResult', 'error', 'Failed to create order: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
+                    $('#paymentInfoDiv').hide();
+                }
+            });
+        });
+
+        // Pay Now Button
+        $('#payNowBtn').click(function() {
+            if (!currentOrderData) {
+                alert('Please create an order first!');
+                return;
+            }
+
+            const options = {
+                key: currentOrderData.razorpayKeyId,
+                amount: currentOrderData.amount * 100,
+                currency: currentOrderData.currency,
+                name: currentOrderData.description || 'FlowTrack',
+                description: currentOrderData.description,
+                order_id: currentOrderData.orderId,
+                prefill: {
+                    name: currentOrderData.customerName,
+                    email: currentOrderData.customerEmail,
+                    contact: currentOrderData.customerPhone
+                },
+                theme: {
+                    color: '#007bff'
+                },
+                handler: function(response) {
+                    // Payment successful, verify the signature
+                    verifyPayment(response.razorpay_order_id, response.razorpay_payment_id, response.razorpay_signature);
+                },
+                modal: {
+                    ondismiss: function() {
+                        alert('Payment cancelled');
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        });
+
+        // Verify Payment
+        $('#verificationForm').submit(function(e) {
+            e.preventDefault();
+            verifyPayment($('#verifyOrderId').val(), $('#verifyPaymentId').val(), $('#verifySignature').val());
+        });
+
+        function verifyPayment(orderId, paymentId, signature) {
+            $.ajax({
+                url: '/test/payment/verify',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    razorpayOrderId: orderId,
+                    razorpayPaymentId: paymentId,
+                    razorpaySignature: signature
+                }),
+                success: function(response) {
+                    const resultDiv = currentOrderData ? '#orderResult' : '#verificationResult';
+                    if (response.verified) {
+                        showResult(resultDiv, 'success', '✅ ' + response.message + '\nOrder ID: ' + orderId + '\nPayment ID: ' + paymentId);
+                    } else {
+                        showResult(resultDiv, 'error', '❌ ' + response.message);
+                    }
+                },
+                error: function(xhr) {
+                    showResult('#verificationResult', 'error', 'Verification failed: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
+                }
+            });
+        }
+
+        // Quick Test
+        $('#quickTestBtn').click(function() {
+            const email = prompt('Enter your email for quick test:');
+            if (!email) return;
+
+            const paymentData = {
+                amount: 10,
+                currency: 'INR',
+                customerName: 'Quick Test User',
+                customerEmail: email,
+                customerPhone: '9999999999',
+                description: 'Quick test payment'
+            };
+
+            $.ajax({
+                url: '/test/payment/create-order',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(paymentData),
+                success: function(response) {
+                    if (response.status === 'failed' || response.status === 'error') {
+                        showResult('#quickTestResult', 'error', response.message);
+                    } else {
+                        currentOrderData = response;
+                        showResult('#quickTestResult', 'success', 'Order created! Click "Pay Now" button above.');
+                        $('#paymentInfoDiv').show();
+                        $('#orderId').text(response.orderId);
+                        $('#orderAmount').text(response.amount);
+                        $('#orderStatus').text(response.status);
+                        $('html, body').animate({scrollTop: $('#paymentInfoDiv').offset().top - 100}, 500);
+                    }
+                },
+                error: function(xhr) {
+                    showResult('#quickTestResult', 'error', 'Failed: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
+                }
+            });
+        });
+
+        function showResult(selector, type, message) {
+            $(selector).removeClass('success error').addClass(type).html(message.replace(/\n/g, '<br>')).show();
+            setTimeout(function() {
+                $(selector).fadeOut();
+            }, 10000);
+        }
+    </script>
+</body>
+</html>
